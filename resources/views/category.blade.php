@@ -157,7 +157,7 @@
 
     @media (max-width: 62rem) {
         .clothing-features-section {
-            padding: 2.5rem 0.9375rem;
+            padding: 1.5rem 0.9375rem 2.5rem;
         }
         .clothing-features-inner {
             padding: 0 0.625rem;

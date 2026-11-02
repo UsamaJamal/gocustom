@@ -622,6 +622,8 @@
         margin-top: -10px;
         text-align: center;
         margin-bottom: 16px;
+        margin-left: auto;
+        margin-right: auto;
         width: 97%;
         height: auto;
         line-height: 29px;
@@ -875,6 +877,7 @@
         font-size: 14px;
         line-height: 29px;
         text-align: justify;
+        text-align-last: center;
     }
 
     .footer-heading {

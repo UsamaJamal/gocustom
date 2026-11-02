@@ -465,9 +465,33 @@
 
         @media (max-width: 36rem) {
             .iq-features-container {
-                grid-template-columns: repeat(2, 1fr);
-                padding: 1.875rem 1.25rem;
-                gap: 1.25rem;
+                /* minmax(0, 1fr) keeps both columns equal even when a long title word would push one wider */
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                padding: 1.25rem 1rem;
+                gap: 0.75rem;
+            }
+
+            .iq-feature-item {
+                --heading-h4-size: 1rem;
+                justify-content: flex-start;
+                gap: 0.375rem;
+                padding: 1.25rem 0.75rem;
+                border-radius: 0.875rem;
+            }
+
+            .iq-feature-item img {
+                width: 2.5rem;
+                height: 2.5rem;
+                margin-bottom: 0.25rem;
+            }
+
+            .iq-feature-item h4 {
+                line-height: 1.3;
+            }
+
+            .iq-feature-item p {
+                line-height: 1.4;
+                color: #444;
             }
         }
     </style>

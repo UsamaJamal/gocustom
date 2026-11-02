@@ -72,6 +72,13 @@
         }
     }
 
+    /* Global mobile paragraph size — overrides section-specific p sizes on phones */
+    @media (max-width: 48rem) {
+        p {
+            font-size: 16px !important;
+        }
+    }
+
     .header-container {
         width: 100% !important;
         max-width: var(--site-container-width) !important;

@@ -3091,6 +3091,14 @@
                     text-align: center;
                 }
             }
+
+            /* How It Works is hidden on mobile home (≤48rem), so the testimonials
+               section's own top padding provides the gap — avoid doubling it here. */
+            @media (max-width: 48rem) {
+                .why-choose-section-custom {
+                    padding-bottom: 0;
+                }
+            }
         </style>
 
         <section class="why-choose-section-custom">

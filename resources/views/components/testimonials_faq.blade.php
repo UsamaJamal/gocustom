@@ -214,7 +214,8 @@
 
     @media (max-width: 62rem) {
         .testimonials-faq-section {
-            padding: 0.625rem 0 2.5rem 0;
+            /* Top padding matches the h2 margin-bottom so the heading has equal space above and below */
+            padding: 1.875rem 0 2.5rem 0;
             overflow: hidden;
             width: 100%;
         }
