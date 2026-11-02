@@ -70,24 +70,28 @@ class AdminFaqPageController extends Controller
         $answersInput = (array) $request->input('answers', []);
 
         foreach ($headings as $index => $headingText) {
-            if (empty(trim($headingText))) continue;
+            $headingText = trim((string) $headingText);
 
             $faqs = [];
             $qs = $questionsInput[$index] ?? [];
             $as = $answersInput[$index] ?? [];
 
             foreach ($qs as $qIndex => $qText) {
-                $aText = $as[$qIndex] ?? '';
-                if (!empty(trim($qText)) && !empty(trim($aText))) {
+                $qText = trim((string) $qText);
+                $aText = trim((string) ($as[$qIndex] ?? ''));
+                if ($qText !== '' && $aText !== '') {
                     $faqs[] = [
-                        'question' => trim($qText),
-                        'answer' => trim($aText)
+                        'question' => $qText,
+                        'answer' => $aText
                     ];
                 }
             }
 
+            // Heading is optional: keep the section if it has a heading or at least one FAQ
+            if ($headingText === '' && empty($faqs)) continue;
+
             $sections[] = [
-                'heading' => trim($headingText),
+                'heading' => $headingText,
                 'faqs' => $faqs
             ];
         }

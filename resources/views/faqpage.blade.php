@@ -148,7 +148,9 @@
             $faqs = array_filter($section['faqs'] ?? [], function ($f) {
                 return !empty(trim($f['question'] ?? '')) && !empty(trim($f['answer'] ?? ''));
             });
-            if (!empty(trim($section['heading'] ?? '')) && !empty($faqs)) {
+            // Heading is optional — a section shows as long as it has FAQs
+            if (!empty($faqs)) {
+                $section['heading'] = trim($section['heading'] ?? '');
                 $section['faqs'] = array_values($faqs);
                 $sections[] = $section;
             }
@@ -158,12 +160,14 @@
     <div class="faq-container">
         <div class="faq-content">
             @foreach($sections as $index => $section)
-                @php 
-                    $slug = \Illuminate\Support\Str::slug($section['heading']);
+                @php
+                    $slug = \Illuminate\Support\Str::slug($section['heading']) ?: 'faq-section-' . ($index + 1);
                     $faqs = $section['faqs'] ?? [];
                 @endphp
                 <div class="faq-section" id="{{ $slug }}">
-                    <h2 class="faq-section-title">{{ $section['heading'] }}</h2>
+                    @if($section['heading'] !== '')
+                        <h2 class="faq-section-title">{{ $section['heading'] }}</h2>
+                    @endif
                     <div class="faq-accordion">
                         @foreach($faqs as $faq)
                             <div class="faq-item">

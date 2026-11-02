@@ -204,6 +204,7 @@
                 content_style: 'body { font-family:"DM Sans",sans-serif; font-size:0.875rem; line-height:1.6; }'
             });
         }
+    });
 </script>
 <script>
     function updateFaqLabels() {
