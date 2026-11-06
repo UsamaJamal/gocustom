@@ -334,6 +334,7 @@ Route::get('/author/{slug?}', function ($slug = null) {
 Route::get('/request-quote', [QuotationController::class, 'index']);
 Route::get('/sitemap', [SitemapController::class, 'index']);
 Route::get('/sitemap.xml', [SitemapController::class, 'xml']);
+Route::get('/image-sitemap.xml', [SitemapController::class, 'images']);
 
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminHomepageController;
