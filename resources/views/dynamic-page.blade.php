@@ -4,8 +4,9 @@
     $metaKeywords = $page['meta_keywords'] ?? null;
     $robots = $page['robots'] ?? 'index,follow';
     $pageImage = !empty($page['image']) ? $page['image'] : null;
+    $pageFaqs = !empty($page['faqs']) ? (json_decode($page['faqs'], true) ?: []) : [];
 @endphp
-@include('components.htmlboilerplate', ['title' => $title, 'metaDescription' => $metaDescription, 'metaKeywords' => $metaKeywords, 'robots' => $robots, 'image' => $pageImage])
+@include('components.htmlboilerplate', ['title' => $title, 'metaDescription' => $metaDescription, 'metaKeywords' => $metaKeywords, 'robots' => $robots, 'image' => $pageImage, 'schema' => $page['schema'] ?? ''])
 <style>
     .dynamic-hero {
         background-color: #ffffff;
@@ -112,6 +113,7 @@
         {!! $page['content'] !!}
     </div>
 
+    @include('components.product-faq', ['displayFaqs' => $pageFaqs])
     @include('components.cta')
     @include('components.footer')
 </main>

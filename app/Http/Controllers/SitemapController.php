@@ -75,6 +75,15 @@ class SitemapController extends Controller
             ['loc' => $makeUrl('request-quote'), 'changefreq' => 'monthly', 'priority' => '0.8'],
         ]);
 
+        // Pages set to noindex in the admin must not be submitted to search engines.
+        $homeRobots = DB::table('homepage_contents')->where('field_key', 'robots')->value('value');
+        if (stripos((string) $homeRobots, 'noindex') === 0) {
+            $entries->shift();
+        }
+        $indexable = static function ($query) {
+            $query->where('robots', 'not like', 'noindex%');
+        };
+
         $appendRecords = function ($records, string $prefix = '', string $priority = '0.7') use ($entries, $makeUrl, $lastModified) {
             foreach ($records as $record) {
                 $entries->push([
@@ -100,14 +109,19 @@ class SitemapController extends Controller
 
         // Navigation-group categories (Industries, Box By Material, Box by Style)
         // only organise the menu and return 404, so keep them out of the sitemap.
-        $appendRecords($published('admin_categories', static function ($query) {
+        $appendRecords($published('admin_categories', static function ($query) use ($indexable) {
+            $indexable($query);
             $query->where(function ($q) {
                 $q->whereNull('is_nav_group')->orWhere('is_nav_group', 0);
             });
         }), '', '0.8');
-        $appendRecords($published('admin_products'), '', '0.9');
-        $appendRecords($published('admin_pages'), '', '0.7');
-        $appendRecords($published('admin_blogs'), 'blog/', '0.7');
+        // A product sharing its slug with a category never gets a page: that URL serves the category.
+        $appendRecords($published('admin_products', static function ($query) use ($indexable) {
+            $indexable($query);
+            $query->whereNotIn('slug', DB::table('admin_categories')->pluck('slug'));
+        }), '', '0.9');
+        $appendRecords($published('admin_pages', $indexable), '', '0.7');
+        $appendRecords($published('admin_blogs', $indexable), 'blog/', '0.7');
         $appendRecords($published('admin_authors'), 'author/', '0.5');
 
         return response()

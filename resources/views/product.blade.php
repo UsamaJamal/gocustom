@@ -2158,7 +2158,7 @@
                         $pMainImgName = pathinfo(parse_url(asset($pMainImg), PHP_URL_PATH), PATHINFO_FILENAME);
                         $pMainImgCleanName = !empty($pTitle) ? $pTitle : ucwords(str_replace(['-', '_'], ' ', preg_replace('/-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i', '', $pMainImgName)));
                     @endphp
-                    <img id="product-main-image" src="{{ asset($pMainImg) }}" alt="{{ $pMainImgCleanName }}" title="{{ $pMainImgCleanName }}" onerror="this.src='https://placehold.co/600x500/eeeeee/555555?text={{ urlencode($pMainImgCleanName) }}'">
+                    <img id="product-main-image" src="{{ asset($pMainImg) }}" alt="{{ !empty($product['alt_text']) ? $product['alt_text'] : $pMainImgCleanName }}" title="{{ $pMainImgCleanName }}" onerror="this.src='https://placehold.co/600x500/eeeeee/555555?text={{ urlencode($pMainImgCleanName) }}'">
                 </div>
                 @if(count($pGallery))
                 <div class="thumbnails">
