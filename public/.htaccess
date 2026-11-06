@@ -35,6 +35,12 @@
     RewriteCond %{REQUEST_URI} !\.[a-zA-Z0-9]{2,5}$ [NC]
     RewriteRule ^(.+[^/])$ $1/ [L,R=301]
 
+    # Rewrite direct image requests to uploads/ folder if the file exists there
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{DOCUMENT_ROOT}/uploads/$1 -f [OR]
+    RewriteCond %{DOCUMENT_ROOT}/public/uploads/$1 -f
+    RewriteRule ^(.+\.(?:jpe?g|png|gif|webp|svg|jfif|ico))$ uploads/$1 [L,NC]
+
     # Send Requests To Front Controller...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f

@@ -335,6 +335,8 @@ Route::get('/request-quote', [QuotationController::class, 'index']);
 Route::get('/sitemap', [SitemapController::class, 'index']);
 Route::get('/sitemap.xml', [SitemapController::class, 'xml']);
 Route::get('/image-sitemap.xml', [SitemapController::class, 'images']);
+Route::get('/sitemap-images.xml', [SitemapController::class, 'images']);
+Route::get('/images-sitemap.xml', [SitemapController::class, 'images']);
 
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminHomepageController;
@@ -410,6 +412,23 @@ Route::get('/preview-email', function () {
     ];
     return new \App\Mail\QuoteFormMail($data);
 });
+
+// Direct image route fallback: serve images from public/uploads/ if requested without the /uploads/ prefix
+Route::get('/{imagePath}', function ($imagePath) {
+    if (str_contains($imagePath, '..')) {
+        abort(404);
+    }
+    $fullPath = public_path('uploads/' . $imagePath);
+    $realUploads = realpath(public_path('uploads'));
+    $realPath = realpath($fullPath);
+
+    if ($realPath && $realUploads && str_starts_with($realPath, $realUploads) && is_file($realPath)) {
+        return response()->file($realPath, [
+            'Cache-Control' => 'public, max-age=31536000',
+        ]);
+    }
+    abort(404);
+})->where('imagePath', '.+\.(jpe?g|png|gif|webp|svg|jfif|ico)$');
 
 // Catch-all route for categories and products
 Route::get('/{slug}', function ($slug) {

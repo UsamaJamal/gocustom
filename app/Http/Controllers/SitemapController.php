@@ -146,15 +146,45 @@ class SitemapController extends Controller
      */
     public function images()
     {
-        $entries = collect();
-        $addPage = function (string $path, array $images) use ($entries) {
-            $urls = array_map(function ($image) {
-                return $this->imageUrl($image);
-            }, $images);
-            $urls = array_values(array_unique(array_filter($urls)));
+        $lastModified = static function ($date): ?string {
+            return $date ? Carbon::parse($date)->toDateString() : null;
+        };
 
-            if ($urls) {
-                $entries->push(['loc' => $this->pageUrl($path), 'images' => $urls]);
+        $entries = collect();
+        $addPage = function (string $path, array $images, ?string $lastmod = null, string $changefreq = 'weekly', string $priority = '0.7') use ($entries) {
+            $urls = array_map(function ($image) {
+                if (is_array($image)) {
+                    $loc = $this->imageUrl($image['loc'] ?? $image['image'] ?? null);
+                    if (!$loc) {
+                        return null;
+                    }
+                    return [
+                        'loc' => $loc,
+                        'title' => !empty($image['title']) ? (string) $image['title'] : null,
+                        'caption' => !empty($image['caption']) ? (string) $image['caption'] : null,
+                    ];
+                }
+                $loc = $this->imageUrl($image);
+                return $loc ? ['loc' => $loc] : null;
+            }, $images);
+
+            $cleaned = [];
+            $seen = [];
+            foreach (array_filter($urls) as $item) {
+                if (!isset($seen[$item['loc']])) {
+                    $seen[$item['loc']] = true;
+                    $cleaned[] = $item;
+                }
+            }
+
+            if ($cleaned) {
+                $entries->push([
+                    'loc' => $this->pageUrl($path),
+                    'lastmod' => $lastmod,
+                    'changefreq' => $changefreq,
+                    'priority' => $priority,
+                    'images' => $cleaned,
+                ]);
             }
         };
 
@@ -168,33 +198,86 @@ class SitemapController extends Controller
                 [$homepageValue('hero_image') ?: 'uploads/Home-Banner.webp'],
                 self::HOMEPAGE_IMAGES,
                 DB::table('admin_categories')->whereIn('id', $featuredIds)->pluck('image')->all()
-            ));
+            ), now()->toDateString(), 'daily', '1.0');
         }
 
+        $fixedSettings = [
+            'about-us' => ['changefreq' => 'monthly', 'priority' => '0.8'],
+            'why-choose-us' => ['changefreq' => 'monthly', 'priority' => '0.7'],
+            'request-quote' => ['changefreq' => 'monthly', 'priority' => '0.8'],
+        ];
         foreach (self::FIXED_PAGE_IMAGES as $path => $images) {
-            $addPage($path, $images);
+            $setting = $fixedSettings[$path] ?? ['changefreq' => 'monthly', 'priority' => '0.7'];
+            $addPage($path, $images, null, $setting['changefreq'], $setting['priority']);
         }
 
-        foreach ($this->indexableRecords('admin_categories', ['slug', 'hero_image', 'description', 'feature_sections']) as $category) {
+        foreach ($this->indexableRecords('admin_categories', ['slug', 'title', 'hero_image', 'description', 'feature_sections', 'updated_at']) as $category) {
             $features = (array) json_decode((string) $category->feature_sections, true);
-            $addPage($category->slug, array_merge([$category->hero_image], array_column($features, 'image'), $this->contentImages($category->description)));
+            $catImages = [];
+            if ($category->hero_image) {
+                $catImages[] = ['loc' => $category->hero_image, 'title' => $category->title];
+            }
+            foreach (array_column($features, 'image') as $featImg) {
+                if ($featImg) {
+                    $catImages[] = ['loc' => $featImg, 'title' => $category->title];
+                }
+            }
+            foreach ($this->contentImages($category->description) as $cImg) {
+                $catImages[] = ['loc' => $cImg, 'title' => $category->title];
+            }
+            $addPage($category->slug, $catImages, $lastModified($category->updated_at ?? null), 'weekly', '0.8');
         }
 
-        foreach ($this->indexableRecords('admin_products', ['slug', 'image', 'images', 'description', 'long_description']) as $product) {
+        foreach ($this->indexableRecords('admin_products', ['slug', 'title', 'alt_text', 'image', 'images', 'hover_image', 'description', 'long_description', 'updated_at']) as $product) {
             $gallery = (array) json_decode((string) $product->images, true);
-            $addPage($product->slug, array_merge([$product->image], $gallery, $this->contentImages($product->description, $product->long_description)));
+            $prodImages = [];
+            $title = $product->title ?? '';
+            $caption = $product->alt_text ?: $title;
+
+            if ($product->image) {
+                $prodImages[] = ['loc' => $product->image, 'title' => $title, 'caption' => $caption];
+            }
+            if (!empty($product->hover_image)) {
+                $prodImages[] = ['loc' => $product->hover_image, 'title' => $title, 'caption' => $caption];
+            }
+            foreach ($gallery as $gImg) {
+                if ($gImg) {
+                    $prodImages[] = ['loc' => $gImg, 'title' => $title, 'caption' => $caption];
+                }
+            }
+            foreach ($this->contentImages($product->description, $product->long_description) as $cImg) {
+                $prodImages[] = ['loc' => $cImg, 'title' => $title];
+            }
+            $addPage($product->slug, $prodImages, $lastModified($product->updated_at ?? null), 'weekly', '0.9');
         }
 
-        foreach ($this->indexableRecords('admin_pages', ['slug', 'content']) as $page) {
-            $addPage($page->slug, $this->contentImages($page->content));
+        foreach ($this->indexableRecords('admin_pages', ['slug', 'title', 'content', 'updated_at']) as $page) {
+            $pageImages = [];
+            foreach ($this->contentImages($page->content) as $cImg) {
+                $pageImages[] = ['loc' => $cImg, 'title' => $page->title];
+            }
+            $addPage($page->slug, $pageImages, $lastModified($page->updated_at ?? null), 'weekly', '0.7');
         }
 
-        foreach ($this->indexableRecords('admin_blogs', ['slug', 'image', 'content']) as $blog) {
-            $addPage('blog/' . $blog->slug, array_merge([$blog->image], $this->contentImages($blog->content)));
+        foreach ($this->indexableRecords('admin_blogs', ['slug', 'title', 'alt_text', 'image', 'content', 'updated_at']) as $blog) {
+            $blogImages = [];
+            $title = $blog->title ?? '';
+            $caption = $blog->alt_text ?: $title;
+            if ($blog->image) {
+                $blogImages[] = ['loc' => $blog->image, 'title' => $title, 'caption' => $caption];
+            }
+            foreach ($this->contentImages($blog->content) as $cImg) {
+                $blogImages[] = ['loc' => $cImg, 'title' => $title];
+            }
+            $addPage('blog/' . $blog->slug, $blogImages, $lastModified($blog->updated_at ?? null), 'weekly', '0.7');
         }
 
-        foreach ($this->indexableRecords('admin_authors', ['slug', 'image']) as $author) {
-            $addPage('author/' . $author->slug, [$author->image]);
+        foreach ($this->indexableRecords('admin_authors', ['slug', 'title', 'image', 'updated_at']) as $author) {
+            $authorImages = [];
+            if ($author->image) {
+                $authorImages[] = ['loc' => $author->image, 'title' => $author->title];
+            }
+            $addPage('author/' . $author->slug, $authorImages, $lastModified($author->updated_at ?? null), 'weekly', '0.5');
         }
 
         return response()
@@ -283,13 +366,20 @@ class SitemapController extends Controller
         $path = rawurldecode((string) parse_url($image, PHP_URL_PATH));
         $path = preg_replace('#^(?:\.{0,2}/)*(?:public/)?#i', '', $path);
         if (!Str::startsWith($path, ['storage/', 'uploads/', 'images/'])) {
-            $path = 'storage/' . $path;
+            if (is_file(public_path('uploads/' . $path))) {
+                $path = 'uploads/' . $path;
+            } elseif (is_file(public_path('storage/' . $path))) {
+                $path = 'storage/' . $path;
+            }
         }
 
         if (!is_file(public_path($path))) {
             return null;
         }
 
-        return rtrim(url('/'), '/') . '/' . implode('/', array_map('rawurlencode', explode('/', $path)));
+        // Remove "uploads/" from the public image URL
+        $urlPath = preg_replace('#^uploads/#i', '', $path);
+
+        return rtrim(url('/'), '/') . '/' . implode('/', array_map('rawurlencode', explode('/', $urlPath)));
     }
 }
