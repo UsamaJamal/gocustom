@@ -329,9 +329,44 @@
                 <label>Meta Keywords / Tags</label>
                 <input name="meta_keywords" value="{{ $v('meta_keywords') }}">
             </div>
+            <div class="field full" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:1.25rem; margin-top:0.5rem; margin-bottom:0.5rem;">
+                <div style="font-weight:700; color:#1e293b; margin-bottom:0.75rem; font-size:0.95rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <span>⭐ Schema Rating, Reviews & Price</span>
+                        <span style="font-size:0.75rem; font-weight:400; color:#64748b;">(Signs like $ are added automatically into schema below)</span>
+                    </div>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:1rem;">
+                    <div class="field" style="margin:0;">
+                        <label style="font-size:0.85rem; font-weight:600; color:#475569;">Rating Value (★)</label>
+                        <div style="display:flex; align-items:center; background:#fff; border:1px solid #cbd5e1; border-radius:6px; overflow:hidden;">
+                            <span style="padding:0.45rem 0.65rem; background:#f1f5f9; color:#eab308; font-size:0.95rem; border-right:1px solid #cbd5e1;">★</span>
+                            <input type="text" name="rating_value" id="schema_rating_value" value="{{ $v('rating_value') }}" placeholder="4.9" autocomplete="off" style="border:none; outline:none; flex:1; padding:0.45rem 0.65rem;">
+                        </div>
+                    </div>
+                    <div class="field" style="margin:0;">
+                        <label style="font-size:0.85rem; font-weight:600; color:#475569;">Review Count (💬)</label>
+                        <div style="display:flex; align-items:center; background:#fff; border:1px solid #cbd5e1; border-radius:6px; overflow:hidden;">
+                            <span style="padding:0.45rem 0.65rem; background:#f1f5f9; color:#64748b; font-size:0.85rem; border-right:1px solid #cbd5e1;"><i class="fa-solid fa-comment-dots"></i></span>
+                            <input type="text" name="review_count" id="schema_review_count" value="{{ $v('review_count') }}" placeholder="54" autocomplete="off" style="border:none; outline:none; flex:1; padding:0.45rem 0.65rem;">
+                        </div>
+                    </div>
+                    <div class="field" style="margin:0;">
+                        <label style="font-size:0.85rem; font-weight:600; color:#475569;">Price (USD $)</label>
+                        <div style="display:flex; align-items:center; background:#fff; border:1px solid #cbd5e1; border-radius:6px; overflow:hidden;">
+                            <span style="padding:0.45rem 0.65rem; background:#f1f5f9; color:#64748b; font-weight:700; font-size:0.9rem; border-right:1px solid #cbd5e1;">$</span>
+                            <input type="text" name="price" id="schema_price" value="{{ $v('price') }}" placeholder="0.10" autocomplete="off" style="border:none; outline:none; flex:1; padding:0.45rem 0.65rem;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="field full">
-                <label>Schema JSON-LD</label>
-                <textarea name="schema" placeholder='{"@context":"https://schema.org"}'>{{ $v('schema') }}</textarea>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+                    <label style="margin:0;">Schema JSON-LD</label>
+                    <span id="schema_sync_indicator" style="font-size:0.75rem; color:#16a34a; font-weight:500; display:none;"><i class="fa-solid fa-check"></i> Real-time synced</span>
+                </div>
+                <textarea name="schema" id="schema_json_ld" rows="12" style="font-family:monospace; font-size:13px; line-height:1.4;" placeholder='{"@context":"https://schema.org"}'>{{ $v('schema') }}</textarea>
             </div>
         </div>
     </div>
@@ -525,6 +560,194 @@
         aField.remove();
         updateFaqLabels();
     }
+
+    // --- Schema Real-time Sync Logic ---
+    (function initProductSchemaSync() {
+        const ratingInput = document.getElementById('schema_rating_value');
+        const reviewInput = document.getElementById('schema_review_count');
+        const priceInput = document.getElementById('schema_price');
+        const schemaTextarea = document.getElementById('schema_json_ld');
+        const syncIndicator = document.getElementById('schema_sync_indicator');
+
+        if (!schemaTextarea) return;
+
+        function showSyncIndicator() {
+            if (!syncIndicator) return;
+            syncIndicator.style.display = 'inline-block';
+            clearTimeout(syncIndicator._timer);
+            syncIndicator._timer = setTimeout(() => {
+                syncIndicator.style.display = 'none';
+            }, 1800);
+        }
+
+        function updateFieldRecursive(obj, targetKey, newVal) {
+            if (!obj || typeof obj !== 'object') return false;
+            let updated = false;
+            if (Array.isArray(obj)) {
+                obj.forEach(item => {
+                    if (updateFieldRecursive(item, targetKey, newVal)) updated = true;
+                });
+                return updated;
+            }
+            for (let k in obj) {
+                if (!obj.hasOwnProperty(k)) continue;
+                if (k.toLowerCase() === targetKey.toLowerCase()) {
+                    if (typeof obj[k] === 'number' && !isNaN(Number(newVal)) && String(newVal).trim() !== '') {
+                        obj[k] = Number(newVal);
+                    } else {
+                        obj[k] = String(newVal);
+                    }
+                    updated = true;
+                } else if (typeof obj[k] === 'object' && obj[k] !== null) {
+                    if (updateFieldRecursive(obj[k], targetKey, newVal)) updated = true;
+                }
+            }
+            return updated;
+        }
+
+        function findFieldRecursive(obj, targetKey) {
+            if (!obj || typeof obj !== 'object') return null;
+            if (Array.isArray(obj)) {
+                for (let item of obj) {
+                    let found = findFieldRecursive(item, targetKey);
+                    if (found !== null) return found;
+                }
+                return null;
+            }
+            for (let k in obj) {
+                if (!obj.hasOwnProperty(k)) continue;
+                if (k.toLowerCase() === targetKey.toLowerCase()) {
+                    return obj[k];
+                }
+                if (typeof obj[k] === 'object' && obj[k] !== null) {
+                    let found = findFieldRecursive(obj[k], targetKey);
+                    if (found !== null) return found;
+                }
+            }
+            return null;
+        }
+
+        function syncInputsToSchema() {
+            const raw = schemaTextarea.value.trim();
+            if (!raw) return;
+
+            const ratingVal = ratingInput ? ratingInput.value.trim() : '';
+            const reviewVal = reviewInput ? reviewInput.value.trim() : '';
+            const priceVal = priceInput ? priceInput.value.trim() : '';
+
+            let hasScriptTag = false;
+            let jsonText = raw;
+            const scriptMatch = raw.match(/^<script\b[^>]*>([\s\S]*?)<\/script>$/i);
+            if (scriptMatch) {
+                hasScriptTag = true;
+                jsonText = scriptMatch[1].trim();
+            }
+
+            let parsed = null;
+            try {
+                parsed = JSON.parse(jsonText);
+            } catch (err) {
+                parsed = null;
+            }
+
+            let priceRangeVal = priceVal;
+            if (priceRangeVal !== '' && !priceRangeVal.startsWith('$')) {
+                priceRangeVal = '$' + priceRangeVal;
+            }
+            let cleanPrice = priceVal.replace(/^\$+/, '').trim();
+            if (cleanPrice === '') cleanPrice = priceVal;
+
+            if (parsed) {
+                if (ratingVal !== '') updateFieldRecursive(parsed, 'ratingValue', ratingVal);
+                if (reviewVal !== '') updateFieldRecursive(parsed, 'reviewCount', reviewVal);
+                if (priceVal !== '') {
+                    updateFieldRecursive(parsed, 'price', cleanPrice);
+                    updateFieldRecursive(parsed, 'priceRange', priceRangeVal);
+                }
+                const formatted = JSON.stringify(parsed, null, 2);
+                schemaTextarea.value = hasScriptTag
+                    ? '<script type="application/ld+json">\n' + formatted + '\n<\/script>'
+                    : formatted;
+                showSyncIndicator();
+            } else {
+                let updated = raw;
+                if (ratingVal !== '') {
+                    updated = updated.replace(/("ratingValue"\s*:\s*)("[^"]*"|[0-9.]+)/gi, '$1' + JSON.stringify(ratingVal));
+                }
+                if (reviewVal !== '') {
+                    updated = updated.replace(/("reviewCount"\s*:\s*)("[^"]*"|[0-9]+)/gi, '$1' + JSON.stringify(reviewVal));
+                }
+                if (priceVal !== '') {
+                    if (/("price"\s*:)/i.test(updated)) {
+                        updated = updated.replace(/("price"\s*:\s*)("[^"]*"|[0-9.]+)/gi, '$1' + JSON.stringify(cleanPrice));
+                    }
+                    if (/priceRange/i.test(updated)) {
+                        updated = updated.replace(/("priceRange"\s*:\s*)("[^"]*")/gi, '$1' + JSON.stringify(priceRangeVal));
+                    }
+                }
+                schemaTextarea.value = updated;
+                showSyncIndicator();
+            }
+        }
+
+        function syncSchemaToInputs() {
+            const raw = schemaTextarea.value.trim();
+            if (!raw) return;
+
+            let jsonText = raw;
+            const scriptMatch = raw.match(/^<script\b[^>]*>([\s\S]*?)<\/script>$/i);
+            if (scriptMatch) {
+                jsonText = scriptMatch[1].trim();
+            }
+
+            try {
+                const parsed = JSON.parse(jsonText);
+                if (ratingInput && !ratingInput.value) {
+                    const r = findFieldRecursive(parsed, 'ratingValue');
+                    if (r !== null) ratingInput.value = r;
+                }
+                if (reviewInput && !reviewInput.value) {
+                    const rc = findFieldRecursive(parsed, 'reviewCount');
+                    if (rc !== null) reviewInput.value = rc;
+                }
+                if (priceInput && !priceInput.value) {
+                    const p = findFieldRecursive(parsed, 'price') ?? findFieldRecursive(parsed, 'priceRange');
+                    if (p !== null) {
+                        const strP = String(p).trim();
+                        priceInput.value = (/^\$[0-9]/.test(strP)) ? strP.substring(1) : strP;
+                    }
+                }
+            } catch (err) {
+                if (ratingInput && !ratingInput.value) {
+                    const m = raw.match(/"ratingValue"\s*:\s*("([^"]*)"|([0-9.]+))/i);
+                    if (m) ratingInput.value = m[2] || m[3];
+                }
+                if (reviewInput && !reviewInput.value) {
+                    const m = raw.match(/"reviewCount"\s*:\s*("([^"]*)"|([0-9]+))/i);
+                    if (m) reviewInput.value = m[2] || m[3];
+                }
+                if (priceInput && !priceInput.value) {
+                    const m = raw.match(/"price"\s*:\s*("([^"]*)"|([0-9.]+))/i) || raw.match(/"priceRange"\s*:\s*"([^"]*)"/i);
+                    if (m) {
+                        const strP = (m[2] || m[3] || m[1] || '').trim();
+                        priceInput.value = (/^\$[0-9]/.test(strP)) ? strP.substring(1) : strP;
+                    }
+                }
+            }
+        }
+
+        [ratingInput, reviewInput, priceInput].forEach(inp => {
+            if (inp) {
+                inp.addEventListener('input', syncInputsToSchema);
+                inp.addEventListener('change', syncInputsToSchema);
+            }
+        });
+
+        schemaTextarea.addEventListener('input', syncSchemaToInputs);
+        schemaTextarea.addEventListener('paste', () => setTimeout(syncSchemaToInputs, 100));
+
+        syncSchemaToInputs();
+    })();
 </script>
 
 @endsection
