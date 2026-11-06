@@ -124,17 +124,6 @@ class AdminContentController extends Controller
 
     private function persist(Request $request, string $module, string $id)
     {
-        if ($module === 'categories') {
-
-            if ($currentFeatured) {
-                $featuredIds = array_map('intval', (array) (json_decode($currentFeatured, true) ?: []));
-                $featuredIds = array_values(array_filter($featuredIds, fn($catId) => $catId != (int) $id));
-                DB::table('homepage_contents')->where('field_key', 'featured_categories')->update([
-                    'value' => json_encode($featuredIds),
-                    'updated_at' => now()
-                ]);
-            }
-        }
         $table = ['products'=>'admin_products','categories'=>'admin_categories','blogs'=>'admin_blogs','pages'=>'admin_pages','authors'=>'admin_authors'][$module];
         $columns = [
             'products' => ['title','slug','status','show_home','show_as_custom_box','image','nav_image','images','description','long_description','alt_text','box_style','material','printing','finishing','dimensions','moq','turnaround','meta_title','meta_description','meta_keywords','robots','schema','related'],
@@ -148,6 +137,8 @@ class AdminContentController extends Controller
         $rules = [
             'title' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255',
+            'meta_title' => 'nullable|string|max:255',
+            'alt_text' => 'nullable|string|max:255',
             'schema' => 'nullable|string|max:50000',
             'hero_description' => 'nullable|string',
         ];
@@ -172,6 +163,11 @@ class AdminContentController extends Controller
 
         if (isset($payload['publish_date']) && !empty(trim($payload['publish_date']))) {
             $payload['publish_date'] = date('Y-m-d', strtotime(trim($payload['publish_date'])));
+        }
+
+        // The position column is NOT NULL, but the number input can be cleared in the form.
+        if (array_key_exists('position', $payload) && $payload['position'] === null) {
+            $payload['position'] = 0;
         }
 
         foreach (['show_home', 'set_home', 'show_in_nav', 'show_as_custom_box', 'is_nav_group'] as $checkboxField) {
@@ -314,7 +310,7 @@ class AdminContentController extends Controller
             }
         }
         if ($module === 'categories') {
-
+            $currentFeatured = DB::table('homepage_contents')->where('field_key', 'featured_categories')->value('value');
             $featuredIds = $currentFeatured ? (json_decode($currentFeatured, true) ?: []) : [];
             $featuredIds = array_map('intval', (array) $featuredIds);
             $targetIntId = (int) $targetId;
@@ -392,7 +388,7 @@ class AdminContentController extends Controller
             DB::table('admin_category_product')->where('product_id', $id)->delete();
         }
         if ($module === 'categories') {
-
+            $currentFeatured = DB::table('homepage_contents')->where('field_key', 'featured_categories')->value('value');
             if ($currentFeatured) {
                 $featuredIds = array_map('intval', (array) (json_decode($currentFeatured, true) ?: []));
                 $featuredIds = array_values(array_filter($featuredIds, fn($catId) => $catId != (int) $id));
