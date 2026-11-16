@@ -35,6 +35,12 @@
 <body style="background-color: #f9f9f9; padding: 1.25rem;">
     <h2 style="text-align: center; color: #3498DB; font-family: Arial, sans-serif; margin-bottom: 1.25rem; font-size: 1.5rem;">Request a Quote</h2>
     <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; max-width: 50rem; margin: 0 auto;">
+        @if(!empty($data['quote_ref']))
+        <tr>
+            <th style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; background-color: #0B2240; color: #ffffff; width: 30%; font-weight: bold;">Quote Reference:</th>
+            <td style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; color: #0B2240; background-color: #f1f5f9; font-weight: bold;">{{ $data['quote_ref'] }}</td>
+        </tr>
+        @endif
         @php
             $productName = $data['product_name'] ?? $data['box_style'] ?? null;
         @endphp
