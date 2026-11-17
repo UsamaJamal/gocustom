@@ -81,12 +81,6 @@
                             @endif
                         </td>
                     </tr>
-                    @if(!empty($data['quote_ref']))
-                    <tr>
-                        <th align="left" style="{{ $th }}">Quote Ref:</th>
-                        <td style="{{ $td }}">{{ $data['quote_ref'] }}</td>
-                    </tr>
-                    @endif
                 </table>
             </td>
         </tr>

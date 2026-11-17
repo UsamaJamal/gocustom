@@ -31,8 +31,7 @@ class QuoteFormMail extends Mailable
     public function build()
     {
         $isProduct = (!empty($this->data['form_source']) && $this->data['form_source'] === 'product');
-        $refPrefix = !empty($this->data['quote_ref']) ? '[' . $this->data['quote_ref'] . '] ' : '';
-        $subject = $refPrefix . ($isProduct ? 'Product Request a Quote' : 'Request a Quote');
+        $subject = $isProduct ? 'Product Request a Quote' : 'Request a Quote';
 
         $mail = $this->subject($subject)
                      ->view('emails.quote');
