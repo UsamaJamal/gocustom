@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Mail\Mailable;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ContactFormMail;
 use App\Mail\QuoteFormMail;
@@ -15,13 +17,39 @@ class FormSubmitController extends Controller
 {
     private $adminEmail;
     private $supportEmail;
-    private $fromName;
 
     public function __construct()
     {
-        $this->adminEmail = config('mail.to.address');
-        $this->supportEmail = env('MAIL_SUPPORT_ADDRESS', env('MAIL_FROM_ADDRESS', 'support@gocustomboxes.com'));
-        $this->fromName = config('mail.from.name', 'Go Custom Boxes Support');
+        $this->adminEmail = config('mail.admin.address');
+        $this->supportEmail = config('mail.support.address');
+    }
+
+    /**
+     * Every quote/contact submission sends two different emails:
+     *  1. the table-style notification to the admin (Hostinger) inbox, from the site's main address;
+     *  2. the branded "thank you" confirmation to the customer only, from the support address.
+     * Each send has its own try/catch, so one failing never stops the other.
+     */
+    private function sendFormEmails(Mailable $adminMail, ?string $customerEmail, Mailable $customerMail, string $label)
+    {
+        $adminEmail = $this->adminEmail;
+
+        try {
+            Mail::to($adminEmail)->send($adminMail);
+        } catch (\Exception $e) {
+            Log::error("Admin {$label} mail error: " . $e->getMessage());
+        }
+
+        // The branded confirmation is for the customer only, never for the admin inbox.
+        if (empty($customerEmail) || strcasecmp(trim($customerEmail), trim((string) $adminEmail)) === 0) {
+            return;
+        }
+
+        try {
+            Mail::mailer(config('mail.support.mailer'))->to($customerEmail)->send($customerMail);
+        } catch (\Exception $e) {
+            Log::error("Customer {$label} confirmation mail error: " . $e->getMessage());
+        }
     }
 
     // Strip surrounding whitespace (incl. non-breaking spaces) so "   " fails the required rule.
@@ -49,25 +77,13 @@ class FormSubmitController extends Controller
         $contactRef = 'GCB-C' . strtoupper(substr(md5(uniqid((string) mt_rand(), true)), 0, 5));
         $validated['contact_ref'] = $contactRef;
 
-        $adminEmail = $this->adminEmail;
-        $supportEmail = $this->supportEmail;
-
-        dispatch(function () use ($validated, $adminEmail, $supportEmail, $contactRef) {
-            // 1. Send notification email to Hostinger / Admin
-            try {
-                Mail::to($adminEmail)->send(new ContactFormMail($validated));
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('Admin contact mail error: ' . $e->getMessage());
-            }
-
-            // 2. Send confirmation copy from support to User
-            try {
-                if (!empty($validated['email'])) {
-                    Mail::to($validated['email'])->send(new CustomerContactConfirmationMail($validated, $contactRef, $supportEmail));
-                }
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('Customer contact confirmation mail error: ' . $e->getMessage());
-            }
+        dispatch(function () use ($validated, $contactRef) {
+            $this->sendFormEmails(
+                new ContactFormMail($validated),
+                $validated['email'] ?? null,
+                new CustomerContactConfirmationMail($validated, $contactRef, $this->supportEmail),
+                'contact'
+            );
         })->afterResponse();
 
         if ($request->expectsJson()) {
@@ -145,25 +161,13 @@ class FormSubmitController extends Controller
         $quoteRef = 'GCB-' . strtoupper(substr(md5(uniqid((string) mt_rand(), true)), 0, 6));
         $validated['quote_ref'] = $quoteRef;
 
-        $adminEmail = $this->adminEmail;
-        $supportEmail = $this->supportEmail;
-
-        dispatch(function () use ($validated, $adminEmail, $supportEmail, $quoteRef) {
-            // 1. Send notification email to Hostinger / Admin
-            try {
-                Mail::to($adminEmail)->send(new QuoteFormMail($validated));
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('Admin quote mail error: ' . $e->getMessage());
-            }
-
-            // 2. Send confirmation copy from support to User
-            try {
-                if (!empty($validated['email'])) {
-                    Mail::to($validated['email'])->send(new CustomerQuoteConfirmationMail($validated, $quoteRef, $supportEmail));
-                }
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('Customer quote confirmation mail error: ' . $e->getMessage());
-            }
+        dispatch(function () use ($validated, $quoteRef) {
+            $this->sendFormEmails(
+                new QuoteFormMail($validated),
+                $validated['email'] ?? null,
+                new CustomerQuoteConfirmationMail($validated, $quoteRef, $this->supportEmail),
+                'quote'
+            );
         })->afterResponse();
 
         if ($request->expectsJson()) {

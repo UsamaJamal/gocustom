@@ -6,6 +6,10 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
+/**
+ * Branded "thank you" email that goes only to the customer, from the support mailbox.
+ * The admin mailbox gets the table-style ContactFormMail instead.
+ */
 class CustomerContactConfirmationMail extends Mailable
 {
     use Queueable, SerializesModels;
@@ -13,8 +17,6 @@ class CustomerContactConfirmationMail extends Mailable
     public $data;
     public $contactRef;
     public $supportEmail;
-    public $fromAddress;
-    public $fromName;
 
     /**
      * Create a new message instance.
@@ -27,9 +29,7 @@ class CustomerContactConfirmationMail extends Mailable
     {
         $this->data = $data;
         $this->contactRef = $contactRef ?: ($data['contact_ref'] ?? 'GCB-C' . strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 5)));
-        $this->supportEmail = $supportEmail ?: env('MAIL_SUPPORT_ADDRESS', 'support@gocustomboxes.com');
-        $this->fromAddress = config('mail.from.address', 'info@gocustomboxes.com');
-        $this->fromName = config('mail.from.name', 'Go Custom Boxes');
+        $this->supportEmail = $supportEmail ?: config('mail.support.address');
     }
 
     /**
@@ -40,10 +40,11 @@ class CustomerContactConfirmationMail extends Mailable
     public function build()
     {
         $subject = 'Thank You for Contacting Us (' . $this->contactRef . ') - Go Custom Boxes - ✓ Message Received';
+        $supportName = config('mail.support.name', 'Go Custom Boxes Support');
 
         return $this->subject($subject)
-                    ->from($this->fromAddress, 'Go Custom Boxes Support')
-                    ->replyTo($this->supportEmail, 'Go Custom Boxes Support')
+                    ->from($this->supportEmail, $supportName)
+                    ->replyTo($this->supportEmail, $supportName)
                     ->view('emails.customer_contact', [
                         'data' => $this->data,
                         'contactRef' => $this->contactRef,

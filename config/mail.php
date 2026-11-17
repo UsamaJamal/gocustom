@@ -45,6 +45,20 @@ return [
             'auth_mode' => null,
         ],
 
+        // Sends the customer confirmation emails as the support mailbox. Hostinger only lets an
+        // SMTP login send "From" its own address, so support@ needs its own login here.
+        // Host/port/encryption default to the main SMTP settings.
+        'support' => [
+            'transport' => 'smtp',
+            'host' => env('MAIL_SUPPORT_HOST', env('MAIL_HOST', 'smtp.mailgun.org')),
+            'port' => env('MAIL_SUPPORT_PORT', env('MAIL_PORT', 587)),
+            'encryption' => env('MAIL_SUPPORT_ENCRYPTION', env('MAIL_ENCRYPTION', 'tls')),
+            'username' => env('MAIL_SUPPORT_USERNAME', env('MAIL_SUPPORT_ADDRESS')),
+            'password' => env('MAIL_SUPPORT_PASSWORD'),
+            'timeout' => null,
+            'auth_mode' => null,
+        ],
+
         'ses' => [
             'transport' => 'ses',
         ],
@@ -96,10 +110,22 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
-    // Form submissions are delivered to this inbox.
-    'to' => [
+    // Form submissions (the table-style admin emails) are delivered to this inbox.
+    // Keep this key named 'admin', never 'to': Laravel treats config('mail.to') as a global
+    // "always send to" address and would redirect every email, including the customer's
+    // confirmation, to this inbox.
+    'admin' => [
         'address' => env('MAIL_TO_ADDRESS', env('MAIL_FROM_ADDRESS', 'hello@example.com')),
         'name' => env('MAIL_TO_NAME', env('MAIL_FROM_NAME', 'Go Custom Boxes')),
+    ],
+
+    // The "thank you" confirmation that goes only to the customer is sent from this address.
+    // 'mailer' picks the mailer that sends it: the 'support' SMTP login above once
+    // MAIL_SUPPORT_PASSWORD is set, otherwise the default mailer.
+    'support' => [
+        'address' => env('MAIL_SUPPORT_ADDRESS', 'support@gocustomboxes.com'),
+        'name' => env('MAIL_SUPPORT_NAME', 'Go Custom Boxes Support'),
+        'mailer' => env('MAIL_SUPPORT_MAILER', env('MAIL_SUPPORT_PASSWORD') ? 'support' : null),
     ],
 
     /*

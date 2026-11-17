@@ -1,209 +1,95 @@
+{{-- Admin (Hostinger inbox) notification for every quote form: plain table, blue labels on the left.
+     The customer gets the branded emails/customer_quote.blade.php instead. --}}
+@php
+    $value = function ($key) use ($data) {
+        $v = $data[$key] ?? null;
+        return ($v === null || trim((string) $v) === '') ? 'N/A' : $v;
+    };
+
+    if (!empty($data['quote_file_path'])) {
+        $fileText = 'Attached' . (!empty($data['quote_file_name']) ? ': ' . $data['quote_file_name'] : '');
+    } else {
+        $fileText = 'No file uploaded';
+    }
+
+    $pageUrl = $data['source_page'] ?? '';
+    $pageUrlIsLink = (bool) preg_match('#^https?://#i', (string) $pageUrl);
+
+    // [label, value, always shown?] in the order of the original admin email.
+    // Rows marked false only appear when the form actually sent that field.
+    $rows = [
+        ['Product Name', $data['product_name'] ?? $value('box_style'), true],
+        ['Client Name', $value('name'), true],
+        ['Client Email', $value('email'), true],
+        ['Client Phone', $value('phone'), true],
+        ['Company', $value('company_name'), false],
+        ['Website', $value('website'), false],
+        ['Address', $value('physical_address'), true],
+        ['Length', $value('length'), true],
+        ['Width', $value('width'), true],
+        ['Height', $value('depth'), true],
+        ['Unit', $value('units'), true],
+        ['Material', $value('material'), false],
+        ['Stock', $value('paper_stock'), true],
+        ['Color', $value('color'), true],
+        ['Coating', $value('paper_coating'), true],
+        ['CAD Sample', $value('cad_sample'), true],
+        ['Turn Around Time', $value('turn_around_time'), false],
+        ['Qty', $value('quantity'), true],
+        ['File', $fileText, true],
+        ['Message', $value('message'), true],
+        ['Source', $value('source_form'), true],
+    ];
+
+    // The product page sample-kit form has no file upload, so it gets no File row.
+    if (($data['source_form'] ?? '') === 'Product Page - Bottom Form') {
+        $rows = array_values(array_filter($rows, function ($row) {
+            return $row[0] !== 'File';
+        }));
+    }
+
+    $th = 'width:35%; padding:10px 12px; background-color:#3498DB; color:#ffffff; border:1px solid #dddddd; font-family:Arial, sans-serif; font-size:13px; font-weight:bold; text-align:left; vertical-align:top;';
+    $td = 'padding:10px 12px; background-color:#ffffff; color:#333333; border:1px solid #dddddd; font-family:Arial, sans-serif; font-size:13px; text-align:left; vertical-align:top;';
+@endphp
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <link rel="icon" href="{{ asset('uploads/go-custom-boxes-favicon.png') }}" type="image/png">
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-family: Arial, sans-serif;
-            max-width: 50rem;
-            margin: 0 auto;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 0.75rem;
-            text-align: left;
-            font-size: 0.875rem;
-        }
-        th {
-            background-color: #3498DB;
-            color: #ffffff;
-            width: 30%;
-            font-weight: bold;
-        }
-        td {
-            color: #333333;
-            background-color: #ffffff;
-        }
-        body {
-            background-color: #f9f9f9;
-            padding: 1.25rem;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request a Quote</title>
 </head>
-<body style="background-color: #f9f9f9; padding: 1.25rem;">
-    <h2 style="text-align: center; color: #3498DB; font-family: Arial, sans-serif; margin-bottom: 1.25rem; font-size: 1.5rem;">Request a Quote</h2>
-    <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; max-width: 50rem; margin: 0 auto;">
-        @if(!empty($data['quote_ref']))
+<body style="margin:0; padding:20px; background-color:#f4f4f4; font-family:Arial, sans-serif;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:600px; margin:0 auto; border-collapse:collapse; background-color:#ffffff;">
         <tr>
-            <th style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; background-color: #0B2240; color: #ffffff; width: 30%; font-weight: bold;">Quote Reference:</th>
-            <td style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; color: #0B2240; background-color: #f1f5f9; font-weight: bold;">{{ $data['quote_ref'] }}</td>
-        </tr>
-        @endif
-        @php
-            $productName = $data['product_name'] ?? $data['box_style'] ?? null;
-        @endphp
-        @if(!empty($productName) && $productName !== 'N/A')
-        <tr>
-            <th style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; background-color: #3498DB; color: #ffffff; width: 30%; font-weight: bold;">Product Name:</th>
-            <td style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; color: #333333; background-color: #ffffff;">{{ $productName }}</td>
-        </tr>
-        @endif
-
-        @if(!empty($data['name']) && $data['name'] !== 'N/A')
-        <tr>
-            <th style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; background-color: #3498DB; color: #ffffff; width: 30%; font-weight: bold;">Client Name:</th>
-            <td style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; color: #333333; background-color: #ffffff;">{{ $data['name'] }}</td>
-        </tr>
-        @endif
-        
-        @if(!empty($data['email']) && $data['email'] !== 'N/A')
-        <tr>
-            <th style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; background-color: #3498DB; color: #ffffff; width: 30%; font-weight: bold;">Client Email:</th>
-            <td style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; color: #333333; background-color: #ffffff;">{{ $data['email'] }}</td>
-        </tr>
-        @endif
-        
-        @if(!empty($data['phone']) && $data['phone'] !== 'N/A')
-        <tr>
-            <th style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; background-color: #3498DB; color: #ffffff; width: 30%; font-weight: bold;">Client Phone:</th>
-            <td style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; color: #333333; background-color: #ffffff;">{{ $data['phone'] }}</td>
-        </tr>
-        @endif
-        
-        @if(!empty($data['company_name']) && $data['company_name'] !== 'N/A')
-        <tr>
-            <th style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; background-color: #3498DB; color: #ffffff; width: 30%; font-weight: bold;">Company:</th>
-            <td style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; color: #333333; background-color: #ffffff;">{{ $data['company_name'] }}</td>
-        </tr>
-        @endif
-        
-        @if(!empty($data['website']) && $data['website'] !== 'N/A')
-        <tr>
-            <th style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; background-color: #3498DB; color: #ffffff; width: 30%; font-weight: bold;">Website:</th>
-            <td style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; color: #333333; background-color: #ffffff;">{{ $data['website'] }}</td>
-        </tr>
-        @endif
-        
-        @if(!empty($data['physical_address']) && $data['physical_address'] !== 'N/A')
-        <tr>
-            <th style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; background-color: #3498DB; color: #ffffff; width: 30%; font-weight: bold;">Physical Address:</th>
-            <td style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; color: #333333; background-color: #ffffff;">{{ $data['physical_address'] }}</td>
-        </tr>
-        @endif
-
-        @if(!empty($data['length']) && $data['length'] !== 'N/A')
-        <tr>
-            <th style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; background-color: #3498DB; color: #ffffff; width: 30%; font-weight: bold;">Length:</th>
-            <td style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; color: #333333; background-color: #ffffff;">{{ $data['length'] }}</td>
-        </tr>
-        @endif
-        
-        @if(!empty($data['width']) && $data['width'] !== 'N/A')
-        <tr>
-            <th style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; background-color: #3498DB; color: #ffffff; width: 30%; font-weight: bold;">Width:</th>
-            <td style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; color: #333333; background-color: #ffffff;">{{ $data['width'] }}</td>
-        </tr>
-        @endif
-        
-        @if(!empty($data['depth']) && $data['depth'] !== 'N/A')
-        <tr>
-            <th style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; background-color: #3498DB; color: #ffffff; width: 30%; font-weight: bold;">Height:</th>
-            <td style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; color: #333333; background-color: #ffffff;">{{ $data['depth'] }}</td>
-        </tr>
-        @endif
-        
-        @if(!empty($data['units']) && $data['units'] !== 'N/A')
-        <tr>
-            <th style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; background-color: #3498DB; color: #ffffff; width: 30%; font-weight: bold;">Unit:</th>
-            <td style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; color: #333333; background-color: #ffffff;">{{ $data['units'] }}</td>
-        </tr>
-        @endif
-
-        @if(!empty($data['material']) && $data['material'] !== 'N/A')
-        <tr>
-            <th style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; background-color: #3498DB; color: #ffffff; width: 30%; font-weight: bold;">Material:</th>
-            <td style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; color: #333333; background-color: #ffffff;">{{ $data['material'] }}</td>
-        </tr>
-        @endif
-
-        @if(!empty($data['paper_stock']) && $data['paper_stock'] !== 'N/A')
-        <tr>
-            <th style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; background-color: #3498DB; color: #ffffff; width: 30%; font-weight: bold;">Stock:</th>
-            <td style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; color: #333333; background-color: #ffffff;">{{ $data['paper_stock'] }}</td>
-        </tr>
-        @endif
-        
-        @if(!empty($data['color']) && $data['color'] !== 'N/A')
-        <tr>
-            <th style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; background-color: #3498DB; color: #ffffff; width: 30%; font-weight: bold;">Color:</th>
-            <td style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; color: #333333; background-color: #ffffff;">{{ $data['color'] }}</td>
-        </tr>
-        @endif
-        
-        @if(!empty($data['paper_coating']) && $data['paper_coating'] !== 'N/A')
-        <tr>
-            <th style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; background-color: #3498DB; color: #ffffff; width: 30%; font-weight: bold;">Coating:</th>
-            <td style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; color: #333333; background-color: #ffffff;">{{ $data['paper_coating'] }}</td>
-        </tr>
-        @endif
-        
-        @if(isset($data['cad_sample']) && $data['cad_sample'] !== '' && $data['cad_sample'] !== 'N/A')
-        <tr>
-            <th style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; background-color: #3498DB; color: #ffffff; width: 30%; font-weight: bold;">CAD Sample:</th>
-            <td style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; color: #333333; background-color: #ffffff;">{{ $data['cad_sample'] }}</td>
-        </tr>
-        @endif
-        
-        @if(!empty($data['turn_around_time']) && $data['turn_around_time'] !== 'N/A')
-        <tr>
-            <th style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; background-color: #3498DB; color: #ffffff; width: 30%; font-weight: bold;">Turn Around Time:</th>
-            <td style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; color: #333333; background-color: #ffffff;">{{ $data['turn_around_time'] }}</td>
-        </tr>
-        @endif
-        
-        @if(!empty($data['quantity']) && $data['quantity'] !== 'N/A')
-        <tr>
-            <th style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; background-color: #3498DB; color: #ffffff; width: 30%; font-weight: bold;">Qty:</th>
-            <td style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; color: #333333; background-color: #ffffff;">{{ $data['quantity'] }}</td>
-        </tr>
-        @endif
-
-        {{-- The product page sample-kit form has no file upload. --}}
-        @if(($data['source_form'] ?? '') !== 'Product Page - Bottom Form')
-        <tr>
-            <th style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; background-color: #3498DB; color: #ffffff; width: 30%; font-weight: bold;">File:</th>
-            <td style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; color: #333333; background-color: #ffffff;">
-                @if(!empty($data['quote_file_path']) && $data['quote_file_path'] !== 'N/A')
-                    Attached{{ !empty($data['quote_file_name']) ? ': ' . $data['quote_file_name'] : '' }}
-                @else
-                    No file uploaded
-                @endif
+            <td style="padding:20px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;">
+                    @foreach($rows as [$label, $text, $show])
+                        @if($show || $text !== 'N/A')
+                        <tr>
+                            <th align="left" style="{{ $th }}">{{ $label }}:</th>
+                            <td style="{{ $td }}{{ $label === 'Message' ? ' white-space:pre-line;' : '' }}">{{ $text }}</td>
+                        </tr>
+                        @endif
+                    @endforeach
+                    <tr>
+                        <th align="left" style="{{ $th }}">Page URL:</th>
+                        <td style="{{ $td }}">
+                            @if($pageUrlIsLink)
+                                <a href="{{ $pageUrl }}" style="color:#1a73e8; text-decoration:underline; word-break:break-all;">{{ $pageUrl }}</a>
+                            @else
+                                {{ $pageUrl !== '' ? $pageUrl : 'N/A' }}
+                            @endif
+                        </td>
+                    </tr>
+                    @if(!empty($data['quote_ref']))
+                    <tr>
+                        <th align="left" style="{{ $th }}">Quote Ref:</th>
+                        <td style="{{ $td }}">{{ $data['quote_ref'] }}</td>
+                    </tr>
+                    @endif
+                </table>
             </td>
         </tr>
-        @endif
-        
-        @if(!empty($data['message']) && $data['message'] !== 'N/A')
-        <tr>
-            <th style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; background-color: #3498DB; color: #ffffff; width: 30%; font-weight: bold;">Message:</th>
-            <td style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; color: #333333; background-color: #ffffff;">{{ $data['message'] }}</td>
-        </tr>
-        @endif
-
-        @if(!empty($data['source_form']) || !empty($data['source_page']))
-        <tr>
-            <th style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; background-color: #3498DB; color: #ffffff; width: 30%; font-weight: bold;">Source:</th>
-            <td style="border: 1px solid #ddd; padding: 0.75rem; text-align: left; font-size: 0.875rem; color: #333333; background-color: #ffffff;">
-                @if(!empty($data['source_form']))
-                    <strong>{{ $data['source_form'] }}</strong><br>
-                @endif
-                @if(!empty($data['source_page']))
-                    {{ $data['source_page'] }}
-                @endif
-            </td>
-        </tr>
-        @endif
     </table>
 </body>
 </html>
