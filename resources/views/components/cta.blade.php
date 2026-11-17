@@ -286,7 +286,7 @@
                 </a>
             </div>
             <div class="cta-image-wrapper">
-                <img src="{{ asset('uploads/Ellipse 793.png') }}" alt="Decorative packaging background ellipse" class="cta-desktop-ellipse">
+                <img src="{{ asset('uploads/Ellipse 793.webp') }}" alt="Decorative packaging background ellipse" class="cta-desktop-ellipse" width="351" height="162">
                 <img src="{{ asset('uploads/cta-img.webp') }}" class="cta-main-img" alt="Custom Packaging" onerror="this.src='https://placehold.co/540x324/f5bd00/112a46?text=Custom+Packaging'">
             </div>
         </div>

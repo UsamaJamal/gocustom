@@ -1,0 +1,206 @@
+# Search engines - Google
+User-agent: Googlebot
+Disallow: /
+
+User-agent: Googlebot-Mobile
+Disallow: /
+
+User-agent: Googlebot-Image
+Disallow: /
+
+User-agent: Googlebot-News
+Disallow: /
+
+User-agent: Googlebot-Video
+Disallow: /
+
+User-agent: AdsBot-Google
+Disallow: /
+
+User-agent: AdsBot-Google-Mobile
+Disallow: /
+
+User-agent: Mediapartners-Google
+Disallow: /
+
+# Bing
+User-agent: Bingbot
+Disallow: /
+
+User-agent: BingPreview
+Disallow: /
+
+User-agent: msnbot
+Disallow: /
+
+User-agent: msnbot-media
+Disallow: /
+
+User-agent: adidxbot
+Disallow: /
+
+# Yahoo
+User-agent: Slurp
+Disallow: /
+
+# Yandex
+User-agent: Yandex
+Disallow: /
+
+User-agent: YandexBot
+Disallow: /
+
+User-agent: YandexMobileBot
+Disallow: /
+
+# Baidu
+User-agent: Baiduspider
+Disallow: /
+
+User-agent: Baiduspider-mobile
+Disallow: /
+
+# DuckDuckGo
+User-agent: DuckDuckBot
+Disallow: /
+
+# Sogou
+User-agent: Sogou web spider
+Disallow: /
+
+User-agent: Sogou inst spider
+Disallow: /
+
+# Naver
+User-agent: Yeti
+Disallow: /
+
+# Ecosia / other minor search engines
+User-agent: Ecosiabot
+Disallow: /
+
+User-agent: Exabot
+Disallow: /
+
+# AI / LLM / chatbot crawlers - ALLOWED
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: GoogleOther
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: Diffbot
+Allow: /
+
+User-agent: FacebookBot
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+# SEO / site-audit / analysis crawlers - ALLOWED
+User-agent: Screaming Frog SEO Spider
+Allow: /
+
+User-agent: AhrefsBot
+Allow: /
+
+User-agent: SemrushBot
+Allow: /
+
+User-agent: SemrushBot-SA
+Allow: /
+
+User-agent: MJ12bot
+Allow: /
+
+User-agent: DotBot
+Allow: /
+
+User-agent: rogerbot
+Allow: /
+
+User-agent: SiteAuditBot
+Allow: /
+
+User-agent: BLEXBot
+Allow: /
+
+User-agent: SEOkicks
+Allow: /
+
+User-agent: seobility
+Allow: /
+
+User-agent: LinkdexBot
+Allow: /
+
+User-agent: Screaming-Frog
+Allow: /
+
+User-agent: Sitebulb
+Allow: /
+
+User-agent: OnCrawl
+Allow: /
+
+User-agent: ContentKing
+Allow: /
+
+User-agent: PageModified
+Allow: /
+
+User-agent: GTmetrix
+Allow: /
+
+User-agent: Pingdom
+Allow: /
+
+User-agent: UptimeRobot
+Allow: /
+
+# Catch-all for everything else (unnamed bots, misc crawlers)
+User-agent: *
+Disallow: /

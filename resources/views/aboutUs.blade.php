@@ -278,7 +278,7 @@
                 <img src="{{ asset('uploads/who-img-2.jpg') }}" alt="Custom Green Box" class="img-short" onerror="this.src='https://placehold.co/250x150/blue/white'">
             </div>
             <div class="who-we-are-col">
-                <img src="{{ asset('uploads/who-img-3.jpg') }}" alt="Custom Blue Box" class="img-short" onerror="this.src='https://placehold.co/250x150/tan/white'">
+                <img src="{{ asset('uploads/who-img-3.jpg') }}" alt="Custom Blue Box" class="img-short" onerror="this.src='https://placehold.co/250x150/tan/white'" width="1024" height="1024">
                 <img src="{{ asset('uploads/who-img-4.jpg') }}" alt="Custom Beige Box" class="img-tall" onerror="this.src='https://placehold.co/250x290/tan/white'">
             </div>
         </div>
@@ -289,7 +289,7 @@
 <section class="section-padding" style="padding-top: 0; padding-bottom: 1.25rem;">
     <div class="about-container making-simple">
         <div>
-            <img src="{{ asset('uploads/making-simple-img.jpg') }}" alt="Custom Packaging" class="making-simple-img" onerror="this.src='https://placehold.co/600x600/darkgreen/white'">
+            <img src="{{ asset('uploads/making-simple-img.jpg') }}" alt="Custom Packaging" class="making-simple-img" onerror="this.src='https://placehold.co/600x600/darkgreen/white'" width="1024" height="1024">
         </div>
         <div class="making-simple-text">
             <h2>Making Custom Packaging Simple</h2>

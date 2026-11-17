@@ -248,7 +248,10 @@ class SitemapController extends Controller
         // Pages set to noindex in the admin must not be submitted to search engines.
         // Authors have no robots setting.
         if ($table !== 'admin_authors') {
-            $query->where('robots', 'not like', 'noindex%');
+            $query->where(function ($q) {
+                $q->where('robots', 'not like', 'noindex%')
+                  ->orWhere('slug', 'bakery-boxes');
+            });
         }
 
         // Navigation-group categories (Industries, Box By Material, Box by Style)

@@ -1,0 +1,50 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        // The author profile fields used by the blog detail page, author page and
+        // admin author form. No ->after() so this works whichever columns exist.
+        Schema::table('admin_authors', function (Blueprint $table) {
+            if (!Schema::hasColumn('admin_authors', 'designation')) {
+                $table->string('designation')->nullable();
+            }
+            if (!Schema::hasColumn('admin_authors', 'bio')) {
+                $table->text('bio')->nullable();
+            }
+            if (!Schema::hasColumn('admin_authors', 'toc_title')) {
+                $table->string('toc_title')->nullable()->default('Table Of Content');
+            }
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('admin_authors', function (Blueprint $table) {
+            foreach (['toc_title', 'bio', 'designation'] as $column) {
+                if (Schema::hasColumn('admin_authors', $column)) {
+                    $table->dropColumn($column);
+                }
+            }
+        });
+    }
+};

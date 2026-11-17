@@ -1,0 +1,58 @@
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+    # Return 410 Gone for permanently removed spam / prize URLs
+    RewriteCond %{QUERY_STRING} (^|/)prize(/|$) [NC,OR]
+    RewriteCond %{QUERY_STRING} (^|&)prize(/|$) [NC]
+    RewriteRule ^ - [G,L]
+
+    RewriteRule ^(?:public/)?delivery-information(?:\.php)?$ - [G,L]
+    RewriteRule ^(?:public/)?prize(?:/.*)?$ - [G,L]
+
+    # Redirect www to non-www (https://gocustomboxes.com)
+    RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+    RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L,NE]
+
+    # Redirect directly requested /public URLs to their clean public equivalent.
+    # THE_REQUEST ensures Laravel's internal rewrite does not trigger this redirect.
+    RewriteCond %{THE_REQUEST} \s/+public(?:[/?\s]) [NC]
+    RewriteRule ^public(?:/(.*))?$ /$1 [R=301,L,NE]
+
+    # Canonical public URLs end with a trailing slash, except the homepage
+    # and real files such as sitemap.xml, images, CSS, and JavaScript.
+    RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
+    RewriteCond %{REQUEST_URI} !^/$
+    RewriteCond %{REQUEST_URI} !/$
+    RewriteCond %{REQUEST_URI} !^/admin(?:/|$) [NC]
+    RewriteCond %{REQUEST_URI} !^/api(?:/|$) [NC]
+    RewriteCond %{REQUEST_URI} !^/(?:storage|uploads|images|css|js|build)(?:/|$) [NC]
+    RewriteCond %{REQUEST_URI} !\.[^/]+$ [NC]
+    RewriteRule ^ %{REQUEST_URI}/ [R=301,L,NE]
+
+    # Allow SSL/domain validation files to remain accessible from the project root.
+    RewriteRule ^\.well-known/ - [L]
+
+    # Prevent a rewrite loop after handing the request to Laravel's public folder.
+    RewriteRule ^public/ - [L]
+
+    # Use the public directory as the web root on shared hosting.
+    RewriteRule ^$ public/ [L]
+    RewriteRule ^(.+)$ public/$1 [L]
+</IfModule>
+
+<IfModule mod_headers.c>
+    Header always set Strict-Transport-Security "max-age=31536000"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; connect-src 'self' https:; frame-src 'self' https://maps.google.com https://www.google.com; media-src 'self' https:; worker-src 'self' blob:; upgrade-insecure-requests"
+</IfModule>
+
+# Block direct web access to application and environment files.
+<FilesMatch "(^\.env|^artisan$|^composer\.(json|lock)$|^package(-lock)?\.json$|^phpunit\.xml$)">
+    Require all denied
+</FilesMatch>

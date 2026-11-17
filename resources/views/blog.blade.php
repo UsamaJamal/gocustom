@@ -375,7 +375,9 @@
 
         <section class="blog-content">
             <div class="container">
-                
+
+                <p class="blog-intro" style="max-width: 60rem; margin: 0 auto 1.5rem; color: #333; line-height: 1.7;">The Go Custom Boxes blog shares practical guidance on custom packaging — from choosing the right box style and paper stock to printing finishes, structural design, and sustainability. Our packaging specialists break down corrugated, rigid, kraft, and folding-carton options, explain coating and finishing choices, and cover the trends shaping retail and e-commerce packaging. Browse the latest articles below to plan packaging that protects your products and strengthens your brand.</p>
+
                 @php
                     $featuredBlog = null;
                     $displayBlogs = [
@@ -452,6 +454,8 @@
                                 ? $item['excerpt']
                                 : ($item['content'] ?? '');
                             $bExcerptText = trim(strip_tags(html_entity_decode(html_entity_decode((string) $bExcerpt, ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+                            $bDate = !empty($item['publish_date']) ? date('M d, Y', strtotime($item['publish_date'])) : null;
+                            $bDateIso = !empty($item['publish_date']) ? date('Y-m-d', strtotime($item['publish_date'])) : null;
                         @endphp
                         <div class="blog-card {{ $index >= 9 ? 'blog-card-hidden' : '' }}" onclick="window.location.href='{{ $bUrl }}';" @if($index >= 9) style="display:none;" @endif>
                             @if(!empty($bImg))
@@ -463,6 +467,9 @@
                                     <a href="{{ url('/author/' . $bAuthorSlug) }}/" onclick="event.stopPropagation();" style="text-decoration: none; color: inherit;"><span>{{ $bAuthor }}</span></a>
                                     @else
                                     <span></span>
+                                    @endif
+                                    @if($bDate)
+                                    <time datetime="{{ $bDateIso }}">{{ $bDate }}</time>
                                     @endif
                                     <span>8 min read</span>
                                 </div>

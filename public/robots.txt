@@ -1,86 +1,86 @@
 # Search engines - Google
 User-agent: Googlebot
-Disallow: /
+Disallow:
 
 User-agent: Googlebot-Mobile
-Disallow: /
+Disallow:
 
 User-agent: Googlebot-Image
-Disallow: /
+Disallow:
 
 User-agent: Googlebot-News
-Disallow: /
+Disallow:
 
 User-agent: Googlebot-Video
-Disallow: /
+Disallow:
 
 User-agent: AdsBot-Google
-Disallow: /
+Disallow:
 
 User-agent: AdsBot-Google-Mobile
-Disallow: /
+Disallow:
 
 User-agent: Mediapartners-Google
-Disallow: /
+Disallow:
 
 # Bing
 User-agent: Bingbot
-Disallow: /
+Disallow:
 
 User-agent: BingPreview
-Disallow: /
+Disallow:
 
 User-agent: msnbot
-Disallow: /
+Disallow:
 
 User-agent: msnbot-media
-Disallow: /
+Disallow:
 
 User-agent: adidxbot
-Disallow: /
+Disallow:
 
 # Yahoo
 User-agent: Slurp
-Disallow: /
+Disallow:
 
 # Yandex
 User-agent: Yandex
-Disallow: /
+Disallow:
 
 User-agent: YandexBot
-Disallow: /
+Disallow:
 
 User-agent: YandexMobileBot
-Disallow: /
+Disallow:
 
 # Baidu
 User-agent: Baiduspider
-Disallow: /
+Disallow:
 
 User-agent: Baiduspider-mobile
-Disallow: /
+Disallow:
 
 # DuckDuckGo
 User-agent: DuckDuckBot
-Disallow: /
+Disallow:
 
 # Sogou
 User-agent: Sogou web spider
-Disallow: /
+Disallow:
 
 User-agent: Sogou inst spider
-Disallow: /
+Disallow:
 
 # Naver
 User-agent: Yeti
-Disallow: /
+Disallow:
 
 # Ecosia / other minor search engines
 User-agent: Ecosiabot
-Disallow: /
+Disallow:
 
 User-agent: Exabot
-Disallow: /
+Disallow:
 
 # AI / LLM / chatbot crawlers - ALLOWED
 User-agent: GPTBot
@@ -203,4 +203,6 @@ Allow: /
 
 # Catch-all for everything else (unnamed bots, misc crawlers)
 User-agent: *
-Disallow: /
+Disallow:
+
+Sitemap: https://gocustomboxes.com/sitemap.xml

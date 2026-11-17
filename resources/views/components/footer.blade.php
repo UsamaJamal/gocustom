@@ -5,7 +5,7 @@
             <div class="top-cards-grid">
                 <div class="top-card">
                     <div class="top-card-icon">
-                        <img src="{{ asset('images/contact-email.png') }}" alt="Email">
+                        <img src="{{ asset('images/contact-email.webp') }}" alt="Email" width="25" height="20">
                     </div>
                     <div class="top-card-title">Get In Touch</div>
                     <div class="top-card-text">
@@ -14,7 +14,7 @@
                 </div>
                 <div class="top-card">
                     <div class="top-card-icon">
-                        <img src="{{ asset('images/material-symbols_call-sharp.png') }}" alt="Phone">
+                        <img src="{{ asset('images/material-symbols_call-sharp.webp') }}" alt="Phone" width="30" height="30">
                     </div>
                     <div class="top-card-title">Call Us</div>
                     <div class="top-card-text">
@@ -23,7 +23,7 @@
                 </div>
                 <div class="top-card">
                     <div class="top-card-icon">
-                        <img src="{{ asset('images/contact-address.png') }}" alt="Address">
+                        <img src="{{ asset('images/contact-address.webp') }}" alt="Address" width="19" height="27">
                     </div>
                     <div class="top-card-title">Address</div>
                     <div class="top-card-text">
@@ -123,25 +123,25 @@
                         <span class="footer-heading" style="display: block; margin-bottom: 1.25rem;">Follow Us</span>
                         <div class="social-links desktop-social-links" style="display: flex; justify-content: flex-start; gap: 0.9375rem;">
                             <a href="{{ $siteSettings['social_facebook'] ?? '#' }}" target="_blank" rel="noopener" class="social-icon" aria-label="Facebook">
-                                <img src="{{ asset('images/social-facebook.png') }}" alt="Facebook" class="social-icon-img">
+                                <img src="{{ asset('images/social-facebook.webp') }}" alt="Facebook" class="social-icon-img" width="30" height="30">
                             </a>
                             
                             <a href="{{ $siteSettings['social_instagram'] ?? '#' }}" target="_blank" rel="noopener" class="social-icon" aria-label="Instagram">
-                                <img src="{{ asset('images/social-instagram.png') }}" alt="Instagram" class="social-icon-img">
+                                <img src="{{ asset('images/social-instagram.webp') }}" alt="Instagram" class="social-icon-img" width="30" height="30">
                             </a>
                             
                             <a href="{{ $siteSettings['social_linkedin'] ?? '#' }}" target="_blank" rel="noopener" class="social-icon" aria-label="LinkedIn">
-                                <img src="{{ asset('images/social-linkedin.png') }}" alt="LinkedIn" class="social-icon-img">
+                                <img src="{{ asset('images/social-linkedin.webp') }}" alt="LinkedIn" class="social-icon-img" width="30" height="30">
                             </a>
                             
                             <a href="{{ $siteSettings['social_pinterest'] ?? '#' }}" target="_blank" rel="noopener" class="social-icon" aria-label="Pinterest">
-                                <img src="{{ asset('images/bi_pinterest.png') }}" alt="Pinterest" class="social-icon-img">
+                                <img src="{{ asset('images/bi_pinterest.webp') }}" alt="Pinterest" class="social-icon-img" width="32" height="32">
                             </a>
                             
                             @if(!empty($siteSettings['social_youtube']))
                                 <a href="{{ $siteSettings['social_youtube'] }}" target="_blank" rel="noopener" class="social-icon" aria-label="YouTube">
                                     <span class="visually-hidden">YouTube</span>
-                                    <img src="{{ asset('images/social-youtube.png') }}" alt="YouTube" class="social-icon-img">
+                                    <img src="{{ asset('images/social-youtube.webp') }}" alt="YouTube" class="social-icon-img" width="30" height="24">
                                 </a>
                             @endif
                         </div>
@@ -156,31 +156,31 @@
             <div class="footer-bottom-content">
                 <div class="social-links mobile-social-links">
                     <a href="{{ $siteSettings['social_facebook'] ?? '#' }}" target="_blank" rel="noopener" class="social-icon" aria-label="Facebook">
-                        <img src="{{ asset('images/social-facebook.png') }}" alt="Facebook" class="social-icon-img">
+                        <img src="{{ asset('images/social-facebook.webp') }}" alt="Facebook" class="social-icon-img" width="30" height="30">
                     </a>
                     
                     <a href="{{ $siteSettings['social_instagram'] ?? '#' }}" target="_blank" rel="noopener" class="social-icon" aria-label="Instagram">
-                        <img src="{{ asset('images/social-instagram.png') }}" alt="Instagram" class="social-icon-img">
+                        <img src="{{ asset('images/social-instagram.webp') }}" alt="Instagram" class="social-icon-img" width="30" height="30">
                     </a>
                     
                     <a href="{{ $siteSettings['social_linkedin'] ?? '#' }}" target="_blank" rel="noopener" class="social-icon" aria-label="LinkedIn">
-                        <img src="{{ asset('images/social-linkedin.png') }}" alt="LinkedIn" class="social-icon-img">
+                        <img src="{{ asset('images/social-linkedin.webp') }}" alt="LinkedIn" class="social-icon-img" width="30" height="30">
                     </a>
                     
                     <a href="{{ $siteSettings['social_pinterest'] ?? '#' }}" target="_blank" rel="noopener" class="social-icon" aria-label="Pinterest">
-                        <img src="{{ asset('images/bi_pinterest.png') }}" alt="Pinterest" class="social-icon-img">
+                        <img src="{{ asset('images/bi_pinterest.webp') }}" alt="Pinterest" class="social-icon-img" width="32" height="32">
                     </a>
                     
                     @if(!empty($siteSettings['social_youtube']))
                         <a href="{{ $siteSettings['social_youtube'] }}" target="_blank" rel="noopener" class="social-icon" aria-label="YouTube">
                             <span class="visually-hidden">YouTube</span>
-                            <img src="{{ asset('images/social-youtube.png') }}" alt="YouTube" class="social-icon-img">
+                            <img src="{{ asset('images/social-youtube.webp') }}" alt="YouTube" class="social-icon-img" width="30" height="24">
                         </a>
                     @endif
                 </div>
                 <p class="copyright">© 2026 Go Custom Boxes. All rights reserved.</p>
                 <div class="payment-methods">
-                    <img src="{{ asset('images/Group 1000006247.png') }}" alt="Payment Methods" class="payment-group">
+                    <img src="{{ asset('images/Group 1000006247.webp') }}" alt="Payment Methods" class="payment-group" width="375" height="26">
                 </div>
             </div>
         </div>
