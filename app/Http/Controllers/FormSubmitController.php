@@ -7,15 +7,21 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\ContactFormMail;
 use App\Mail\QuoteFormMail;
 use App\Mail\NewsletterMail;
+use App\Mail\CustomerContactConfirmationMail;
+use App\Mail\CustomerQuoteConfirmationMail;
 use Illuminate\Support\Facades\Storage;
 
 class FormSubmitController extends Controller
 {
     private $adminEmail;
+    private $supportEmail;
+    private $fromName;
 
     public function __construct()
     {
         $this->adminEmail = config('mail.to.address');
+        $this->supportEmail = env('MAIL_SUPPORT_ADDRESS', env('MAIL_FROM_ADDRESS', 'support@gocustomboxes.com'));
+        $this->fromName = config('mail.from.name', 'Go Custom Boxes Support');
     }
 
     // Strip surrounding whitespace (incl. non-breaking spaces) so "   " fails the required rule.
@@ -40,11 +46,27 @@ class FormSubmitController extends Controller
             'message' => 'required|string'
         ]);
 
-        dispatch(function () use ($validated) {
+        $contactRef = 'GCB-C' . strtoupper(substr(md5(uniqid((string) mt_rand(), true)), 0, 5));
+        $validated['contact_ref'] = $contactRef;
+
+        $adminEmail = $this->adminEmail;
+        $supportEmail = $this->supportEmail;
+
+        dispatch(function () use ($validated, $adminEmail, $supportEmail, $contactRef) {
+            // 1. Send notification email to Hostinger / Admin
             try {
-                Mail::to($this->adminEmail)->send(new ContactFormMail($validated));
+                Mail::to($adminEmail)->send(new ContactFormMail($validated));
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('Mail error: ' . $e->getMessage());
+                \Illuminate\Support\Facades\Log::error('Admin contact mail error: ' . $e->getMessage());
+            }
+
+            // 2. Send confirmation copy from support to User
+            try {
+                if (!empty($validated['email'])) {
+                    Mail::to($validated['email'])->send(new CustomerContactConfirmationMail($validated, $contactRef, $supportEmail));
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Customer contact confirmation mail error: ' . $e->getMessage());
             }
         })->afterResponse();
 
@@ -120,11 +142,27 @@ class FormSubmitController extends Controller
             $validated['quote_file_name'] = $file->getClientOriginalName();
         }
 
-        dispatch(function () use ($validated) {
+        $quoteRef = 'GCB-' . strtoupper(substr(md5(uniqid((string) mt_rand(), true)), 0, 6));
+        $validated['quote_ref'] = $quoteRef;
+
+        $adminEmail = $this->adminEmail;
+        $supportEmail = $this->supportEmail;
+
+        dispatch(function () use ($validated, $adminEmail, $supportEmail, $quoteRef) {
+            // 1. Send notification email to Hostinger / Admin
             try {
-                Mail::to($this->adminEmail)->send(new QuoteFormMail($validated));
+                Mail::to($adminEmail)->send(new QuoteFormMail($validated));
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('Mail error: ' . $e->getMessage());
+                \Illuminate\Support\Facades\Log::error('Admin quote mail error: ' . $e->getMessage());
+            }
+
+            // 2. Send confirmation copy from support to User
+            try {
+                if (!empty($validated['email'])) {
+                    Mail::to($validated['email'])->send(new CustomerQuoteConfirmationMail($validated, $quoteRef, $supportEmail));
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Customer quote confirmation mail error: ' . $e->getMessage());
             }
         })->afterResponse();
 
