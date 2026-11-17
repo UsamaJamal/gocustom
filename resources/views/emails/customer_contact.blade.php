@@ -10,8 +10,9 @@
         <!-- Header -->
         <tr>
             <td style="padding:1.5rem 1.25rem; background:#0B2240; text-align:center;">
-                <h1 style="margin:0; color:#ffffff; font-size:1.4rem; font-weight:700; letter-spacing:0.5px;">Go Custom Boxes</h1>
-                <p style="margin:0.35rem 0 0; color:#93c5fd; font-size:0.875rem;">Premium Custom Packaging Solutions</p>
+                {{-- PNG, not the site's SVG logo: Gmail and Outlook don't show SVG. The alt text styles show if images are blocked. --}}
+                <img src="{{ asset('uploads/email-logo.png') }}" width="200" alt="Go Custom Boxes" style="display:block; margin:0 auto; width:200px; max-width:100%; height:auto; border:0; color:#ffffff; font-size:1.4rem; font-weight:700;">
+                <p style="margin:0.5rem 0 0; color:#93c5fd; font-size:0.875rem;">Premium Custom Packaging Solutions</p>
             </td>
         </tr>
 
@@ -80,8 +81,6 @@
             <td style="padding:1.25rem 1.5rem; background:#f8fafc; border-top:1px solid #e2e8f0; font-size:0.825rem; color:#64748b; line-height:1.5;">
                 <p style="margin:0 0 0.5rem; font-weight:600; color:#334155;">Need immediate assistance?</p>
                 <p style="margin:0 0 0.5rem;">
-                    You can reply directly to this email or reach us anytime at:
-                    <br>
                     <strong>Email:</strong> <a href="mailto:{{ $supportEmail ?? 'support@gocustomboxes.com' }}" style="color:#2563eb; text-decoration:none;">{{ $supportEmail ?? 'support@gocustomboxes.com' }}</a>
                     &nbsp;|&nbsp;
                     <strong>Phone:</strong> <a href="tel:+18003158441" style="color:#2563eb; text-decoration:none;">+1-800-315-8441</a>
