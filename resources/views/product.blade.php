@@ -2096,8 +2096,14 @@
         <div class="container">
             @php
                 $pTitle = $product['title'] ?? 'Custom Packaging Box';
-                $productCatId = DB::table('admin_category_product')->where('product_id', $product['id'] ?? 0)->value('category_id');
-                $productCategory = $productCatId ? DB::table('admin_categories')->where('id', $productCatId)->first() : null;
+                // Breadcrumb: the product's first published category (a draft one has no page).
+                $productCategory = null;
+                foreach (DB::table('admin_category_product')->where('product_id', $product['id'] ?? 0)->pluck('category_id') as $productCatId) {
+                    $productCategory = DB::table('admin_categories')->where('id', $productCatId)->where('status', 'published')->first();
+                    if ($productCategory) {
+                        break;
+                    }
+                }
                 $catTitle = $productCategory ? strtoupper($productCategory->title) : 'PRODUCTS';
                 $catUrl = $productCategory ? url('/' . ($productCategory->slug ?? \Illuminate\Support\Str::slug($productCategory->title))) . '/' : '#';
                 

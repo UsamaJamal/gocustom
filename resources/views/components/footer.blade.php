@@ -60,6 +60,7 @@
                             if (!empty($footerCatIds)) {
                                 $footerCats = \Illuminate\Support\Facades\DB::table('admin_categories')
                                     ->whereIn('id', $footerCatIds)
+                                    ->where('status', 'published')
                                     ->get();
                             }
                         @endphp

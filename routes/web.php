@@ -50,8 +50,11 @@ Route::get('/search', function (\Illuminate\Http\Request $request) {
 
     if ($q) {
         $products = DB::table('admin_products')
-            ->where('title', 'like', "%{$q}%")
-            ->orWhere('description', 'like', "%{$q}%")
+            ->where(function ($pQuery) use ($q) {
+                $pQuery->where('title', 'like', "%{$q}%")
+                       ->orWhere('description', 'like', "%{$q}%");
+            })
+            ->where('status', 'published')
             ->get()->map(fn($r)=>(array)$r)->all();
 
         if (count($products) === 0) {
@@ -59,8 +62,11 @@ Route::get('/search', function (\Illuminate\Http\Request $request) {
         }
             
         $categories = DB::table('admin_categories')
-            ->where('title', 'like', "%{$q}%")
-            ->orWhere('description', 'like', "%{$q}%")
+            ->where(function ($cQuery) use ($q) {
+                $cQuery->where('title', 'like', "%{$q}%")
+                       ->orWhere('description', 'like', "%{$q}%");
+            })
+            ->where('status', 'published')
             ->get()->map(fn($r)=>(array)$r)->all();
             
         $blogs = DB::table('admin_blogs')
@@ -428,7 +434,8 @@ Route::get('/{slug}', function ($slug) {
     $category = DB::table('admin_categories')->where('slug', $slug)->first();
     // Navigation-group categories (e.g. Box by Industry / Material / Style) only
     // organise other categories in the menu — they have no public page of their own.
-    if ($category && !empty($category->is_nav_group)) {
+    // Draft and inactive categories are hidden from visitors until they are published.
+    if ($category && (!empty($category->is_nav_group) || $category->status !== 'published')) {
         abort(404);
     }
     if ($category) {
@@ -463,6 +470,10 @@ Route::get('/{slug}', function ($slug) {
 
     // 2. Check if it's a product
     $product = DB::table('admin_products')->where('slug', $slug)->first();
+    // Draft and inactive products are hidden from visitors until they are published.
+    if ($product && $product->status !== 'published') {
+        abort(404);
+    }
     if ($product) {
         $productArr = (array) $product;
         $categories = DB::table('admin_categories')->get()->map(fn($r)=>(array)$r)->all();

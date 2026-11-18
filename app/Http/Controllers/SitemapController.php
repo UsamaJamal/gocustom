@@ -53,13 +53,16 @@ class SitemapController extends Controller
 
     public function index()
     {
-        $blogs = DB::table('admin_blogs')->get();
-        $pages = DB::table('admin_pages')->get();
-        
+        // Visitors only see published items; drafts and inactive ones have no public page.
+        $blogs = DB::table('admin_blogs')->where('status', 'published')->get();
+        $pages = DB::table('admin_pages')->where('status', 'published')->get();
+
+        // Top-level categories are the menu groups (no page of their own), so their status doesn't hide them.
         $parentCategories = DB::table('admin_categories')->whereNull('parent_id')->get();
-        $allCategories = DB::table('admin_categories')->whereNotNull('parent_id')->get();
+        $allCategories = DB::table('admin_categories')->whereNotNull('parent_id')->where('status', 'published')->get();
         $allProducts = DB::table('admin_products')
             ->join('admin_category_product', 'admin_products.id', '=', 'admin_category_product.product_id')
+            ->where('admin_products.status', 'published')
             ->select('admin_products.id', 'admin_products.title', 'admin_products.slug', 'admin_category_product.category_id')
             ->get();
             
@@ -170,8 +173,8 @@ class SitemapController extends Controller
                     $this->latestUpdate(DB::table('homepage_contents')
                         ->whereIn('section', ['general', 'seo', 'hero', 'list', 'content'])
                         ->where('field_key', 'not like', 'popular\_%')),
-                    $this->latestUpdate(DB::table('admin_categories')->whereIn('id', $settingIds('featured_categories'))),
-                    $this->latestUpdate(DB::table('admin_products')->whereIn('id', $settingIds('bestseller_products'))),
+                    $this->latestUpdate(DB::table('admin_categories')->where('status', 'published')->whereIn('id', $settingIds('featured_categories'))),
+                    $this->latestUpdate(DB::table('admin_products')->where('status', 'published')->whereIn('id', $settingIds('bestseller_products'))),
                     $this->latestUpdate(DB::table('admin_blogs')->where('status', 'published')->where(function ($q) {
                         $q->where('show_home', 1)->orWhere('set_home', 1);
                     })),
@@ -288,7 +291,7 @@ class SitemapController extends Controller
             $addPage('', array_merge(
                 [$homepageValue('hero_image') ?: 'uploads/Home-Banner.webp'],
                 self::HOMEPAGE_IMAGES,
-                DB::table('admin_categories')->whereIn('id', $featuredIds)->pluck('image')->all()
+                DB::table('admin_categories')->where('status', 'published')->whereIn('id', $featuredIds)->pluck('image')->all()
             ), $fixedPages['']['lastmod']);
         }
 

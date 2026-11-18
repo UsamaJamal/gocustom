@@ -42,6 +42,11 @@ class AppServiceProvider extends ServiceProvider
                 $allCats = DB::table('admin_categories')
                     ->select('id', 'title', 'slug', 'parent_id', 'icon', 'image')
                     ->where('show_in_nav', 1)
+                    // Draft/inactive categories stay out of the menu. Nav groups (Industries,
+                    // Box By Material, Box by Style) have no page, so their status doesn't hide them.
+                    ->where(function ($q) {
+                        $q->where('status', 'published')->orWhere('is_nav_group', 1);
+                    })
                     ->get()
                     ->map(fn($r) => (array) $r)
                     ->all();
