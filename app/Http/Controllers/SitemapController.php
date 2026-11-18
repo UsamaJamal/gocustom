@@ -90,40 +90,27 @@ class SitemapController extends Controller
      */
     public function xml()
     {
-        // The FAQ page lives at the slug set in Admin → FAQ Page Settings, resolved
-        // the same way as the catch-all route and the header link.
-        $faqSlug = DB::table('homepage_contents')
-            ->where('section', 'faq_page')
-            ->where('field_key', 'faq_page_slug')
-            ->value('value') ?: 'frequentlyAskedQuestions';
-
-        $entries = collect([
-            ['loc' => $this->pageUrl(''), 'changefreq' => 'daily', 'priority' => '1.0'],
-            ['loc' => $this->pageUrl('about-us'), 'changefreq' => 'monthly', 'priority' => '0.8'],
-            ['loc' => $this->pageUrl('contact-us'), 'changefreq' => 'monthly', 'priority' => '0.8'],
-            ['loc' => $this->pageUrl('popular-products'), 'changefreq' => 'weekly', 'priority' => '0.9'],
-            ['loc' => $this->pageUrl('blog'), 'changefreq' => 'weekly', 'priority' => '0.8'],
-            ['loc' => $this->pageUrl(strtolower($faqSlug)), 'changefreq' => 'monthly', 'priority' => '0.7'],
-            ['loc' => $this->pageUrl('why-choose-us'), 'changefreq' => 'monthly', 'priority' => '0.7'],
-            ['loc' => $this->pageUrl('request-quote'), 'changefreq' => 'monthly', 'priority' => '0.8'],
-        ]);
-
-        if (!$this->homepageIsIndexable()) {
-            $entries->shift();
-        }
+        $entries = collect($this->fixedPages())->map(function ($page) {
+            return [
+                'loc' => $this->pageUrl($page['path']),
+                'lastmod' => $page['lastmod'],
+                'changefreq' => $page['changefreq'],
+                'priority' => $page['priority'],
+            ];
+        });
 
         $appendRecords = function ($records, string $prefix = '', string $priority = '0.7') use ($entries) {
             foreach ($records as $record) {
                 $entries->push([
                     'loc' => $this->pageUrl($prefix . $record->slug),
-                    'lastmod' => $this->lastModified($record->updated_at ?? null),
+                    'lastmod' => $this->latestDate($record->updated_at ?? null, $record->created_at ?? null),
                     'changefreq' => 'weekly',
                     'priority' => $priority,
                 ]);
             }
         };
 
-        $columns = ['slug', 'updated_at'];
+        $columns = ['slug', 'updated_at', 'created_at'];
         $appendRecords($this->indexableRecords('admin_categories', $columns), '', '0.8');
         $appendRecords($this->indexableRecords('admin_products', $columns), '', '0.9');
         $appendRecords($this->indexableRecords('admin_pages', $columns), '', '0.7');
@@ -131,8 +118,142 @@ class SitemapController extends Controller
         $appendRecords($this->indexableRecords('admin_authors', $columns), 'author/', '0.5');
 
         return response()
-            ->view('sitemap-xml', ['entries' => $entries->unique('loc')->values()])
+            ->view('sitemap-xml', ['entries' => $this->mergeDuplicates($entries)])
             ->header('Content-Type', 'application/xml; charset=UTF-8');
+    }
+
+    /**
+     * Pages built in code (a route plus a Blade template) instead of in the admin. Only each
+     * page's path, template and priority are listed here; everything else is read live:
+     *  - a page drops out of the sitemaps when its route is removed or it is set to noindex;
+     *  - the FAQ path is the slug from Admin → FAQ Page Settings;
+     *  - lastmod is the newest of the page's own template file and the admin content it shows,
+     *    so it moves forward by itself whenever that page really changes.
+     * Shared parts (header, footer, menus) are left out of lastmod on purpose: a menu change
+     * is not a change to every page.
+     */
+    private function fixedPages(): array
+    {
+        // Every GET route path, to check that a page still exists.
+        $routes = collect(app('router')->getRoutes()->getRoutes())
+            ->filter(function ($route) {
+                return in_array('GET', $route->methods(), true);
+            })
+            ->map(function ($route) {
+                return trim($route->uri(), '/');
+            })
+            ->flip();
+
+        $setting = function (string $section, string $key) {
+            return DB::table('homepage_contents')->where('section', $section)->where('field_key', $key)->value('value');
+        };
+        $settingIds = function (string $key) {
+            $ids = (array) json_decode((string) DB::table('homepage_contents')->where('field_key', $key)->value('value'), true);
+            return array_values(array_filter($ids, 'is_numeric'));
+        };
+
+        // Served by the catch-all /{slug} route, at the slug set in Admin → FAQ Page Settings.
+        $faqSlug = trim(strtolower((string) ($setting('faq_page', 'faq_page_slug') ?: 'frequentlyAskedQuestions')), '/');
+
+        // The contact page reads its SEO settings (robots included) from this admin page record.
+        $contactPage = DB::table('admin_pages')
+            ->where('slug', 'contact-us')
+            ->orWhere('appearance', 'Contact')
+            ->orWhere('title', 'like', '%Contact%')
+            ->first();
+
+        $pages = [
+            [
+                'path' => '', 'view' => 'homepage', 'changefreq' => 'daily', 'priority' => '1.0',
+                'indexable' => $this->homepageIsIndexable(),
+                'updated' => [
+                    $this->latestUpdate(DB::table('homepage_contents')
+                        ->whereIn('section', ['general', 'seo', 'hero', 'list', 'content'])
+                        ->where('field_key', 'not like', 'popular\_%')),
+                    $this->latestUpdate(DB::table('admin_categories')->whereIn('id', $settingIds('featured_categories'))),
+                    $this->latestUpdate(DB::table('admin_products')->whereIn('id', $settingIds('bestseller_products'))),
+                    $this->latestUpdate(DB::table('admin_blogs')->where('status', 'published')->where(function ($q) {
+                        $q->where('show_home', 1)->orWhere('set_home', 1);
+                    })),
+                ],
+            ],
+            ['path' => 'about-us', 'view' => 'aboutUs', 'changefreq' => 'monthly', 'priority' => '0.8'],
+            [
+                'path' => 'contact-us', 'view' => 'contact', 'changefreq' => 'monthly', 'priority' => '0.8',
+                'indexable' => !$contactPage || stripos((string) $contactPage->robots, 'noindex') !== 0,
+                'updated' => [$contactPage->updated_at ?? null],
+            ],
+            [
+                'path' => 'popular-products', 'view' => 'category', 'changefreq' => 'weekly', 'priority' => '0.9',
+                'updated' => [
+                    $this->latestUpdate(DB::table('homepage_contents')->where('field_key', 'like', 'popular\_%')),
+                    $this->latestUpdate(DB::table('admin_products')->where('status', 'published')->where('show_as_custom_box', 1)),
+                ],
+            ],
+            [
+                'path' => 'blog', 'view' => 'blog', 'changefreq' => 'weekly', 'priority' => '0.8',
+                'updated' => [$this->latestUpdate(DB::table('admin_blogs')->where('status', 'published'))],
+            ],
+            [
+                'path' => $faqSlug, 'route' => '{slug}', 'view' => 'faqpage', 'changefreq' => 'monthly', 'priority' => '0.7',
+                'indexable' => $faqSlug !== '',
+                'updated' => [$this->latestUpdate(DB::table('homepage_contents')->where('section', 'faq_page'))],
+            ],
+            ['path' => 'why-choose-us', 'view' => 'whyChooseUs', 'changefreq' => 'monthly', 'priority' => '0.7'],
+            ['path' => 'request-quote', 'view' => 'qotation', 'changefreq' => 'monthly', 'priority' => '0.8'],
+        ];
+
+        $result = [];
+        foreach ($pages as $page) {
+            if (($page['indexable'] ?? true) === false || !isset($routes[$page['route'] ?? $page['path']])) {
+                continue;
+            }
+
+            $result[] = [
+                'path' => $page['path'],
+                'changefreq' => $page['changefreq'],
+                'priority' => $page['priority'],
+                'lastmod' => $this->latestDate($this->viewModified($page['view']), ...($page['updated'] ?? [])),
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Newest updated_at (or created_at when that is empty) of the rows a query matches.
+     */
+    private function latestUpdate($query): ?string
+    {
+        return $query->max(DB::raw('COALESCE(updated_at, created_at)'));
+    }
+
+    /**
+     * Last change time of a Blade template file, or null when it can't be found.
+     */
+    private function viewModified(string $view): ?int
+    {
+        try {
+            $path = view()->getFinder()->find($view);
+        } catch (\InvalidArgumentException $e) {
+            return null;
+        }
+
+        return @filemtime($path) ?: null;
+    }
+
+    /**
+     * One entry per URL. A fixed page can also exist as an admin record with the same slug:
+     * keep the first entry and give it the newest lastmod of the duplicates.
+     */
+    private function mergeDuplicates($entries)
+    {
+        return $entries->groupBy('loc')->map(function ($group) {
+            $entry = $group->first();
+            $entry['lastmod'] = $this->latestDate(...$group->pluck('lastmod')->all());
+
+            return $entry;
+        })->values();
     }
 
     /**
@@ -155,7 +276,10 @@ class SitemapController extends Controller
             }
         };
 
-        if ($this->homepageIsIndexable()) {
+        // Same fixed pages, noindex rules and lastmod as sitemap.xml.
+        $fixedPages = collect($this->fixedPages())->keyBy('path');
+
+        if ($fixedPages->has('')) {
             $homepageValue = static function (string $key) {
                 return DB::table('homepage_contents')->where('field_key', $key)->value('value');
             };
@@ -165,49 +289,51 @@ class SitemapController extends Controller
                 [$homepageValue('hero_image') ?: 'uploads/Home-Banner.webp'],
                 self::HOMEPAGE_IMAGES,
                 DB::table('admin_categories')->whereIn('id', $featuredIds)->pluck('image')->all()
-            ));
+            ), $fixedPages['']['lastmod']);
         }
 
         foreach (self::FIXED_PAGE_IMAGES as $path => $images) {
-            $addPage($path, $images);
+            if ($fixedPages->has($path)) {
+                $addPage($path, $images, $fixedPages[$path]['lastmod']);
+            }
         }
 
-        foreach ($this->indexableRecords('admin_categories', ['slug', 'hero_image', 'description', 'feature_sections', 'updated_at']) as $category) {
+        foreach ($this->indexableRecords('admin_categories', ['slug', 'hero_image', 'description', 'feature_sections', 'updated_at', 'created_at']) as $category) {
             $features = (array) json_decode((string) $category->feature_sections, true);
             $addPage(
                 $category->slug,
                 array_merge([$category->hero_image], array_column($features, 'image'), $this->contentImages($category->description)),
-                $this->lastModified($category->updated_at)
+                $this->latestDate($category->updated_at, $category->created_at)
             );
         }
 
-        foreach ($this->indexableRecords('admin_products', ['slug', 'image', 'images', 'description', 'long_description', 'updated_at']) as $product) {
+        foreach ($this->indexableRecords('admin_products', ['slug', 'image', 'images', 'description', 'long_description', 'updated_at', 'created_at']) as $product) {
             $gallery = (array) json_decode((string) $product->images, true);
             $addPage(
                 $product->slug,
                 array_merge([$product->image], $gallery, $this->contentImages($product->description, $product->long_description)),
-                $this->lastModified($product->updated_at)
+                $this->latestDate($product->updated_at, $product->created_at)
             );
         }
 
-        foreach ($this->indexableRecords('admin_pages', ['slug', 'content', 'updated_at']) as $page) {
-            $addPage($page->slug, $this->contentImages($page->content), $this->lastModified($page->updated_at));
+        foreach ($this->indexableRecords('admin_pages', ['slug', 'content', 'updated_at', 'created_at']) as $page) {
+            $addPage($page->slug, $this->contentImages($page->content), $this->latestDate($page->updated_at, $page->created_at));
         }
 
-        foreach ($this->indexableRecords('admin_blogs', ['slug', 'image', 'content', 'updated_at']) as $blog) {
+        foreach ($this->indexableRecords('admin_blogs', ['slug', 'image', 'content', 'updated_at', 'created_at']) as $blog) {
             $addPage(
                 'blog/' . $blog->slug,
                 array_merge([$blog->image], $this->contentImages($blog->content)),
-                $this->lastModified($blog->updated_at)
+                $this->latestDate($blog->updated_at, $blog->created_at)
             );
         }
 
-        foreach ($this->indexableRecords('admin_authors', ['slug', 'image', 'updated_at']) as $author) {
-            $addPage('author/' . $author->slug, [$author->image], $this->lastModified($author->updated_at));
+        foreach ($this->indexableRecords('admin_authors', ['slug', 'image', 'updated_at', 'created_at']) as $author) {
+            $addPage('author/' . $author->slug, [$author->image], $this->latestDate($author->updated_at, $author->created_at));
         }
 
         return response()
-            ->view('sitemap-images-xml', ['entries' => $entries->unique('loc')->values()])
+            ->view('sitemap-images-xml', ['entries' => $this->mergeDuplicates($entries)])
             ->header('Content-Type', 'application/xml; charset=UTF-8');
     }
 
@@ -222,9 +348,23 @@ class SitemapController extends Controller
         return $path === '' ? $baseUrl . '/' : $baseUrl . '/' . $path . '/';
     }
 
-    private function lastModified($date): ?string
+    /**
+     * Newest of the given dates (date strings or Unix timestamps) as Y-m-d, or null when all are empty.
+     */
+    private function latestDate(...$dates): ?string
     {
-        return $date ? Carbon::parse($date)->toDateString() : null;
+        $latest = null;
+        foreach ($dates as $date) {
+            if (empty($date)) {
+                continue;
+            }
+            $time = is_int($date) ? $date : Carbon::parse($date)->getTimestamp();
+            if ($latest === null || $time > $latest) {
+                $latest = $time;
+            }
+        }
+
+        return $latest === null ? null : Carbon::createFromTimestamp($latest)->toDateString();
     }
 
     private function homepageIsIndexable(): bool
