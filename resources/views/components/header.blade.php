@@ -443,26 +443,29 @@
     }
 
     .mega-menu-icon {
-        width: 1.5rem;
-        height: 1.5rem;
+        width: 2.625rem;
+        height: 2.625rem;
         display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
+        border-radius: 0.25rem;
+        overflow: hidden;
     }
 
     .mega-menu-icon svg {
-        width: 1.375rem;
-        height: 1.375rem;
+        width: 1.625rem;
+        height: 1.625rem;
         stroke: #0B2545;
         fill: none;
     }
 
     .mega-menu-icon img {
-        width: 2.5rem;
-        height: 2.5rem;
+        width: 2.625rem;
+        height: 2.625rem;
         display: block;
-        object-fit: contain;
+        object-fit: cover;
+        border-radius: 0.25rem;
     }
 
     /* Footer / Bottom Banner */
@@ -1329,13 +1332,19 @@
             "{{ $parent['slug'] }}": [
                 @foreach($navByParentSlug[$parent['slug']] ?? [] as $child)
                 @php
-                    $childIcon = !empty($child['icon'])
-                        ? (\Illuminate\Support\Str::startsWith($child['icon'], ['storage/', 'uploads/', 'images/'])
-                            ? asset($child['icon'])
-                            : asset('storage/' . $child['icon']))
+                    $childImgRaw = !empty($child['icon']) ? $child['icon'] : (!empty($child['image']) ? $child['image'] : '');
+                    $childIcon = !empty($childImgRaw)
+                        ? (\Illuminate\Support\Str::startsWith($childImgRaw, ['storage/', 'uploads/', 'images/'])
+                            ? asset($childImgRaw)
+                            : asset('storage/' . $childImgRaw))
                         : '';
                 @endphp
-                { title: @json($child['title']), slug: @json($child['slug']), icon: @json($childIcon) },
+                {
+                    title: @json($child['title']),
+                    slug: @json($child['slug']),
+                    icon: @json($childIcon),
+                    fallbackImage: @json(asset('uploads/gift-box.png'))
+                },
                 @endforeach
             ],
             @endforeach
@@ -1438,7 +1447,9 @@
                 } else if (isProductMenu) {
                     iconHtml = `<img src="${item.fallbackImage}" alt="" loading="lazy">`;
                 } else if (item.icon) {
-                    iconHtml = `<img src="${item.icon}" alt="" loading="lazy">`;
+                    iconHtml = `<img src="${item.icon}" alt="" loading="lazy" onerror="this.onerror=null;this.src='${item.fallbackImage || ''}'">`;
+                } else if (item.fallbackImage) {
+                    iconHtml = `<img src="${item.fallbackImage}" alt="" loading="lazy">`;
                 } else {
                     iconHtml = getCategoryIcon(title, slug);
                 }

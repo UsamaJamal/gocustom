@@ -40,7 +40,7 @@ class AppServiceProvider extends ServiceProvider
         View::composer('*', function ($view) {
             try {
                 $allCats = DB::table('admin_categories')
-                    ->select('id', 'title', 'slug', 'parent_id', 'icon')
+                    ->select('id', 'title', 'slug', 'parent_id', 'icon', 'image')
                     ->where('show_in_nav', 1)
                     ->get()
                     ->map(fn($r) => (array) $r)
