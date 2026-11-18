@@ -366,8 +366,8 @@
         <x-about-hero 
             title="Blog"
             description="Discover packaging ideas, industry trends, design inspiration, and practical tips to help your brand stand out."
-            bgImage="uploads/blog-hero.webp"
-            mobileBgImage="uploads/blog-hero-mobile.webp"
+            bgImage="uploads/blog-banner.webp"
+            mobileBgImage="uploads/blog-banner-mobile.webp"
           
             breadcrumb="Blog"
             overlay="rgba(10, 34, 64, 0.6)"
@@ -375,8 +375,6 @@
 
         <section class="blog-content">
             <div class="container">
-
-                <p class="blog-intro" style="max-width: 60rem; margin: 0 auto 1.5rem; color: #333; line-height: 1.7;">The Go Custom Boxes blog shares practical guidance on custom packaging — from choosing the right box style and paper stock to printing finishes, structural design, and sustainability. Our packaging specialists break down corrugated, rigid, kraft, and folding-carton options, explain coating and finishing choices, and cover the trends shaping retail and e-commerce packaging. Browse the latest articles below to plan packaging that protects your products and strengthens your brand.</p>
 
                 @php
                     $featuredBlog = null;

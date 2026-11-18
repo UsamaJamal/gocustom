@@ -459,8 +459,8 @@
     }
 
     .mega-menu-icon img {
-        width: 1.375rem;
-        height: 1.375rem;
+        width: 2.5rem;
+        height: 2.5rem;
         display: block;
         object-fit: contain;
     }

@@ -178,11 +178,13 @@
             aspect-ratio: 1 / 1 !important;
             background: #F8F5EE;
             margin: 0 !important;
-            padding: 0 !important;
+            padding: 0.5rem 0.625rem !important;
             overflow: hidden;
             flex-shrink: 0;
             box-sizing: border-box;
-            display: block;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
         }
 
         .industry-card__image-wrap img {
@@ -191,8 +193,8 @@
             max-width: 100% !important;
             margin: 0 !important;
             padding: 0 !important;
-            object-fit: cover !important;
-            object-position: center;
+            object-fit: contain !important;
+            object-position: center center !important;
             display: block;
             transition: transform 0.4s ease;
         }
@@ -204,7 +206,7 @@
             }
 
             .industry-card:hover .industry-card__image-wrap img {
-                transform: scale(1.05);
+                transform: scale(1.03);
             }
 
             .industry-card:hover .industry-card__arrow {
@@ -1252,14 +1254,18 @@
                 width: 100% !important;
                 height: auto !important;
                 aspect-ratio: 1 / 1 !important;
-                padding: 0 !important;
+                padding: 0.5rem 0.625rem !important;
                 margin: 0 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
             }
 
             .industry-card__image-wrap img {
                 width: 100% !important;
                 height: 100% !important;
-                object-fit: cover !important;
+                object-fit: contain !important;
+                object-position: center center !important;
             }
         }
 
@@ -1287,14 +1293,18 @@
                 width: 100% !important;
                 height: auto !important;
                 aspect-ratio: 1 / 1 !important;
-                padding: 0 !important;
+                padding: 0.5rem !important;
                 margin: 0 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
             }
 
             .industry-card__image-wrap img {
                 width: 100% !important;
                 height: 100% !important;
-                object-fit: cover !important;
+                object-fit: contain !important;
+                object-position: center center !important;
             }
 
             .industry-card__bottom {
@@ -1327,14 +1337,18 @@
                 width: 100% !important;
                 height: auto !important;
                 aspect-ratio: 1 / 1 !important;
-                padding: 0 !important;
+                padding: 0.375rem !important;
                 margin: 0 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
             }
 
             .industry-card__image-wrap img {
                 width: 100% !important;
                 height: 100% !important;
-                object-fit: cover !important;
+                object-fit: contain !important;
+                object-position: center center !important;
             }
 
             .industry-card__bottom {
