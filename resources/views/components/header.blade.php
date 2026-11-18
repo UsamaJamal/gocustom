@@ -460,11 +460,13 @@
         fill: none;
     }
 
+    /* contain, not cover: Industry/category images are landscape (e.g. 433x352) and
+       cover cut their sides off in the square box. Square product images look the same. */
     .mega-menu-icon img {
         width: 2.625rem;
         height: 2.625rem;
         display: block;
-        object-fit: cover;
+        object-fit: contain;
         border-radius: 0.25rem;
     }
 
