@@ -3,54 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 class SitemapController extends Controller
 {
-    /**
-     * Content photos hard-coded in the homepage and fixed page templates. Logos, icons and
-     * decoration are left out on purpose: they have no value in image search.
-     */
-    private const HOMEPAGE_IMAGES = [
-        'uploads/see-feel-image.webp',
-        'uploads/gloss-home.webp',
-        'uploads/embossing-home.png',
-        'uploads/debossing-home-img.webp',
-        'uploads/matte-lamination.webp',
-        'uploads/holographic-homepage.webp',
-        'uploads/silver-foiling-home.jpg',
-        'uploads/spot-uv-home.png',
-        'uploads/gold-foiling-home.png',
-        'uploads/custom-maroon-heart-chocolate-box.webp',
-        'uploads/custom-navy-blue-rigid-gift-box.webp',
-        'uploads/custom-green-gable-packaging-box.webp',
-        'uploads/custom-cream-square-luxury-box.webp',
-        'uploads/explore.webp',
-        'uploads/choose.webp',
-        'uploads/design.webp',
-        'uploads/order-home-step.webp',
-    ];
-
-    private const FIXED_PAGE_IMAGES = [
-        'about-us' => [
-            'uploads/who-img-1.jpg',
-            'uploads/who-img-2.jpg',
-            'uploads/who-img-3.jpg',
-            'uploads/who-img-4.jpg',
-            'uploads/making-simple-img.jpg',
-        ],
-        'why-choose-us' => [
-            'uploads/craftmenship.png',
-            'uploads/sustainable-packaging.png',
-            'uploads/faq-frequently-asked-questions.png',
-        ],
-        'request-quote' => [
-            'uploads/Apparel Box .png',
-        ],
-    ];
-
     public function index()
     {
         // Visitors only see published items; drafts and inactive ones have no public page.
@@ -267,77 +227,180 @@ class SitemapController extends Controller
      */
     public function images()
     {
-        $entries = collect();
-        $addPage = function (string $path, array $images, ?string $lastmod = null) use ($entries) {
-            $urls = array_map(function ($image) {
+        $toUrls = function (array $images): array {
+            return array_values(array_unique(array_filter(array_map(function ($image) {
                 return $this->imageUrl($image);
-            }, $images);
-            $urls = array_values(array_unique(array_filter($urls)));
-
-            if ($urls) {
-                $entries->push(['loc' => $this->pageUrl($path), 'lastmod' => $lastmod, 'images' => $urls]);
-            }
+            }, $images))));
         };
 
-        // Same fixed pages, noindex rules and lastmod as sitemap.xml.
-        $fixedPages = collect($this->fixedPages())->keyBy('path');
-
-        if ($fixedPages->has('')) {
-            $homepageValue = static function (string $key) {
-                return DB::table('homepage_contents')->where('field_key', $key)->value('value');
-            };
-            $featuredIds = (array) json_decode((string) $homepageValue('featured_categories'), true);
-
-            $addPage('', array_merge(
-                [$homepageValue('hero_image') ?: 'uploads/Home-Banner.webp'],
-                self::HOMEPAGE_IMAGES,
-                DB::table('admin_categories')->where('status', 'published')->whereIn('id', $featuredIds)->pluck('image')->all()
-            ), $fixedPages['']['lastmod']);
-        }
-
-        foreach (self::FIXED_PAGE_IMAGES as $path => $images) {
-            if ($fixedPages->has($path)) {
-                $addPage($path, $images, $fixedPages[$path]['lastmod']);
-            }
-        }
-
+        // Admin records first: their images come straight from the admin fields. $cardImages are
+        // the main images that product, blog and author cards show on listing pages.
+        $records = [];
+        $cardImages = [];
         foreach ($this->indexableRecords('admin_categories', ['slug', 'hero_image', 'description', 'feature_sections', 'updated_at', 'created_at']) as $category) {
             $features = (array) json_decode((string) $category->feature_sections, true);
-            $addPage(
+            $records[] = [
                 $category->slug,
-                array_merge([$category->hero_image], array_column($features, 'image'), $this->contentImages($category->description)),
-                $this->latestDate($category->updated_at, $category->created_at)
-            );
+                $toUrls(array_merge([$category->hero_image], array_column($features, 'image'), $this->contentImages($category->description))),
+                $this->latestDate($category->updated_at, $category->created_at),
+            ];
         }
 
         foreach ($this->indexableRecords('admin_products', ['slug', 'image', 'images', 'description', 'long_description', 'updated_at', 'created_at']) as $product) {
             $gallery = (array) json_decode((string) $product->images, true);
-            $addPage(
+            $cardImages = array_merge($cardImages, $toUrls([$product->image]));
+            $records[] = [
                 $product->slug,
-                array_merge([$product->image], $gallery, $this->contentImages($product->description, $product->long_description)),
-                $this->latestDate($product->updated_at, $product->created_at)
-            );
+                $toUrls(array_merge([$product->image], $gallery, $this->contentImages($product->description, $product->long_description))),
+                $this->latestDate($product->updated_at, $product->created_at),
+            ];
         }
 
         foreach ($this->indexableRecords('admin_pages', ['slug', 'content', 'updated_at', 'created_at']) as $page) {
-            $addPage($page->slug, $this->contentImages($page->content), $this->latestDate($page->updated_at, $page->created_at));
+            $records[] = [$page->slug, $toUrls($this->contentImages($page->content)), $this->latestDate($page->updated_at, $page->created_at)];
         }
 
         foreach ($this->indexableRecords('admin_blogs', ['slug', 'image', 'content', 'updated_at', 'created_at']) as $blog) {
-            $addPage(
+            $cardImages = array_merge($cardImages, $toUrls([$blog->image]));
+            $records[] = [
                 'blog/' . $blog->slug,
-                array_merge([$blog->image], $this->contentImages($blog->content)),
-                $this->latestDate($blog->updated_at, $blog->created_at)
-            );
+                $toUrls(array_merge([$blog->image], $this->contentImages($blog->content))),
+                $this->latestDate($blog->updated_at, $blog->created_at),
+            ];
         }
 
         foreach ($this->indexableRecords('admin_authors', ['slug', 'image', 'updated_at', 'created_at']) as $author) {
-            $addPage('author/' . $author->slug, [$author->image], $this->latestDate($author->updated_at, $author->created_at));
+            $cardImages = array_merge($cardImages, $toUrls([$author->image]));
+            $records[] = ['author/' . $author->slug, $toUrls([$author->image]), $this->latestDate($author->updated_at, $author->created_at)];
+        }
+
+        // Fixed pages (same pages, noindex rules and lastmod as sitemap.xml): the images are read
+        // from the page itself, so they follow the templates and admin settings automatically.
+        // Product, blog and author cards on these pages are left to the page they belong to.
+        $cardImages = array_flip($cardImages);
+        $entries = collect();
+        foreach ($this->fixedPages() as $page) {
+            $images = array_values(array_filter($toUrls($this->pageImages($page['path'], (string) $page['lastmod'])), function ($url) use ($cardImages) {
+                return !isset($cardImages[$url]);
+            }));
+            if ($images) {
+                $entries->push(['loc' => $this->pageUrl($page['path']), 'lastmod' => $page['lastmod'], 'images' => $images]);
+            }
+        }
+
+        foreach ($records as [$path, $images, $lastmod]) {
+            if ($images) {
+                $entries->push(['loc' => $this->pageUrl($path), 'lastmod' => $lastmod, 'images' => $images]);
+            }
         }
 
         return response()
             ->view('sitemap-images-xml', ['entries' => $this->mergeDuplicates($entries)])
             ->header('Content-Type', 'application/xml; charset=UTF-8');
+    }
+
+    /**
+     * Content images a fixed page really shows, read from its rendered HTML: <img>/<source>
+     * images and CSS background images (the hero banners) in the page body. Left out:
+     *  - the header and footer, which are the same on every page;
+     *  - SVG files (icons, logos, patterns);
+     *  - images marked as decoration or logos by their alt text ("", "Decorative …", "… logo"),
+     *    aria-hidden or role="presentation".
+     * The result is cached for an hour per page and lastmod, since rendering pages is slow.
+     */
+    private function pageImages(string $path, string $lastmod): array
+    {
+        $cacheKey = 'sitemap-page-images:' . md5($path . '|' . $lastmod);
+        $cached = Cache::get($cacheKey);
+        if (is_array($cached)) {
+            return $cached;
+        }
+
+        $html = $this->renderPage($path);
+        if ($html === null) {
+            return [];
+        }
+
+        // Only the body counts: <head> styles are site-wide.
+        $body = preg_split('#<body\b#i', $html, 2)[1] ?? '';
+        $body = preg_replace([
+            '#<header\b.*?</header>#is',
+            '#<footer\b.*?</footer>#is',
+            '#<script\b.*?</script>#is',
+            '#<noscript\b.*?</noscript>#is',
+            '#<template\b.*?</template>#is',
+        ], '', $body);
+
+        $images = [];
+        preg_match_all('#<(img|source)\b[^>]*>#i', $body, $tags, PREG_SET_ORDER);
+        foreach ($tags as [$tag, $name]) {
+            $attr = function (string $attribute) use ($tag) {
+                return preg_match('#\s' . $attribute . '\s*=\s*(["\'])(.*?)\1#is', $tag, $m)
+                    ? html_entity_decode($m[2], ENT_QUOTES | ENT_HTML5)
+                    : null;
+            };
+
+            $alt = $attr('alt');
+            $decorative = strtolower($name) === 'img' && $alt !== null
+                && (trim($alt) === '' || preg_match('#^\s*decorative\b|\blogo\b#i', $alt));
+            if ($decorative || preg_match('#\saria-hidden\s*=\s*["\']true|\srole\s*=\s*["\'](presentation|none)["\']#i', $tag)) {
+                continue;
+            }
+
+            foreach (['src', 'data-src'] as $attribute) {
+                if ($src = $attr($attribute)) {
+                    $images[] = $src;
+                }
+            }
+            foreach (['srcset', 'data-srcset'] as $attribute) {
+                foreach (explode(',', (string) $attr($attribute)) as $candidate) {
+                    if ($candidate = strtok(trim($candidate), ' ')) {
+                        $images[] = $candidate;
+                    }
+                }
+            }
+        }
+
+        // Background images set in the page body, e.g. the hero banner (desktop and mobile).
+        preg_match_all('#url\(\s*["\']?([^"\')]+?)["\']?\s*\)#i', html_entity_decode($body, ENT_QUOTES | ENT_HTML5), $backgrounds);
+        $images = array_merge($images, $backgrounds[1]);
+
+        // Photos only: SVG icons and logos have no value in image search.
+        $images = array_values(array_unique(array_filter($images, function ($image) {
+            return (bool) preg_match('#\.(webp|png|jpe?g|gif|avif)$#i', (string) parse_url($image, PHP_URL_PATH));
+        })));
+
+        Cache::put($cacheKey, $images, 3600);
+
+        return $images;
+    }
+
+    /**
+     * HTML of a public page, rendered inside this request without its web middleware
+     * (session, CSRF), or null when the page doesn't render with status 200.
+     */
+    private function renderPage(string $path): ?string
+    {
+        $container = app();
+        $hadFlag = $container->bound('middleware.disable');
+        $previous = $hadFlag ? $container->make('middleware.disable') : null;
+        $container->instance('middleware.disable', true);
+
+        try {
+            $response = app('router')->dispatch(Request::create($this->pageUrl($path), 'GET'));
+
+            return $response->getStatusCode() === 200 ? (string) $response->getContent() : null;
+        } catch (\Throwable $e) {
+            Log::warning('Image sitemap could not render /' . $path . ': ' . $e->getMessage());
+
+            return null;
+        } finally {
+            if ($hadFlag) {
+                $container->instance('middleware.disable', $previous);
+            } else {
+                $container->forgetInstance('middleware.disable');
+            }
+        }
     }
 
     /**
