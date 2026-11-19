@@ -65,7 +65,7 @@ class AdminHomepageController extends Controller
                         $settings[$key] = $val;
                     }
                 }
-                return array_merge($defaults, $settings);
+                return $this->fixPopularHeroPath(array_merge($defaults, $settings));
             }
         } catch (\Exception $e) {
             // Fallback if table query fails
@@ -76,11 +76,28 @@ class AdminHomepageController extends Controller
         if (file_exists($path)) {
             $data = json_decode(file_get_contents($path), true);
             if (is_array($data)) {
-                return array_merge($defaults, array_intersect_key($data, $defaults));
+                return $this->fixPopularHeroPath(array_merge($defaults, array_intersect_key($data, $defaults)));
             }
         }
 
         return $defaults;
+    }
+
+    /**
+     * Banners uploaded before the Popular Products fix sit in public/storage/uploads while their
+     * saved path says "uploads/...", so the page couldn't find them. Point such a path at the
+     * file's real place; the next save from the admin stores the corrected path.
+     */
+    private function fixPopularHeroPath(array $settings): array
+    {
+        $image = ltrim((string) ($settings['popular_hero_image'] ?? ''), '/');
+        if (\Illuminate\Support\Str::startsWith($image, 'uploads/')
+            && !is_file(public_path($image))
+            && is_file(public_path('storage/' . $image))) {
+            $settings['popular_hero_image'] = 'storage/' . $image;
+        }
+
+        return $settings;
     }
 
     public function edit()
@@ -278,24 +295,22 @@ class AdminHomepageController extends Controller
             'popular_faq_answers' => 'nullable|array',
         ]);
 
-        // Handle Image Deletion
-        if ($request->input('remove_popular_hero_image') == '1' && !empty($settings['popular_hero_image'])) {
-            Storage::disk('public')->delete($settings['popular_hero_image']);
+        // Handle Image Removal. The file itself is kept: public/uploads is shared with other pages.
+        if ($request->input('remove_popular_hero_image') == '1') {
             $settings['popular_hero_image'] = '';
         }
 
-        // Handle Image Upload
+        // Handle Image Upload: into public/uploads, like the homepage banner, so the saved
+        // "uploads/..." path is where the page looks for it. (It used to go to
+        // public/storage/uploads, so the page never found it and showed the default banner.)
         if ($request->hasFile('popular_hero_image')) {
             $file = $request->file('popular_hero_image');
             $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $extension = $file->getClientOriginalExtension();
             // Store directly without UUID
             $filename = $originalName . '.' . $extension;
-            $path = $file->storeAs('uploads', $filename, 'public');
-            if (!empty($settings['popular_hero_image'])) {
-                Storage::disk('public')->delete($settings['popular_hero_image']);
-            }
-            $settings['popular_hero_image'] = $path;
+            $file->move(public_path('uploads'), $filename);
+            $settings['popular_hero_image'] = 'uploads/' . $filename;
         }
 
         // Text Fields
