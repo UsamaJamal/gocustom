@@ -24,7 +24,7 @@
         ['Client Phone', $value('phone'), true],
         ['Company', $value('company_name'), false],
         ['Website', $value('website'), false],
-        ['Address', $value('physical_address'), true],
+        ['Address', $value('physical_address'), false],
         ['Length', $value('length'), true],
         ['Width', $value('width'), true],
         ['Height', $value('depth'), true],
