@@ -1,12 +1,32 @@
 @php
-    // Main image of the page, also used as the share image (og/twitter). The page's hero
-    // banner (components/inner-hero) is a CSS background, so this is the first real image.
-    $whyUsImage = 'uploads/craftmenship.png';
-    $whyUsImageAlt = 'Premium custom packaging craftsmanship';
+    // Hero banner at the top of the page, also used as the share image (og/twitter).
+    $whyHeroImage = 'uploads/why-choose-us-hero.webp';
+    $whyHeroImageAlt = 'Go Custom Boxes logo with custom printed shopping bag, perfume box, mailer and gift boxes';
+
+    // Image of the craftsmanship section; it is sized to the height of the text next to it.
+    $whyUsImage = 'uploads/why-choose-us-craftsmanship.webp';
+    $whyUsImageAlt = 'Black and gold rigid boxes, the Go Custom Boxes foil logo and an offset printing press';
+
+    // FAQs shown on this page (components/faq) and in its FAQPage schema.
+    $whyUsFaqs = [
+        ['question' => 'What makes Go Custom Boxes different from other packaging suppliers?',
+         'answer' => 'We combine the care of a design studio with factory-direct pricing. Every order includes free graphic design support, a digital proof before production, no die or plate charges, and free shipping.'],
+        ['question' => 'What is your minimum order quantity?',
+         'answer' => 'Our minimum order starts at 100 units for most box styles, so new and growing brands can order custom packaging without buying thousands of boxes. The exact minimum can vary with the box structure and material.'],
+        ['question' => 'Do you charge for design, dies or printing plates?',
+         'answer' => 'No. Our design team helps with your artwork for free, and there are no die or plate charges. Your quote covers your boxes and shipping, with no hidden setup fees.'],
+        ['question' => 'Will I see my design before production starts?',
+         'answer' => 'Yes. We send a digital proof of your box for approval before anything is printed, and you can request a physical sample or prototype before full production.'],
+        ['question' => 'How long does production take?',
+         'answer' => 'Standard production takes 8 to 10 business days after you approve the final digital proof. If you have a strict deadline, rush production and shipping options are available.'],
+        ['question' => 'Do you offer eco-friendly packaging?',
+         'answer' => 'Yes. We use responsibly sourced paperboard, recyclable materials and eco-friendly inks, and we can recommend kraft and other sustainable options that suit your product.'],
+    ];
 @endphp
 @include('components.htmlboilerplate', [
-    'image' => $whyUsImage,
-    'imageAlt' => $whyUsImageAlt,
+    'image' => $whyHeroImage,
+    'imageAlt' => $whyHeroImageAlt,
+    'faqs' => $whyUsFaqs,
     'title' => 'Why Choose Us | Go Custom Boxes',
     'metaDescription' => 'Discover why brands choose Go Custom Boxes for custom printed packaging, superior structural strength, wholesale pricing, and reliable delivery.',
     'metaKeywords' => 'why choose go custom boxes, custom packaging benefits, box printing quality',
@@ -50,20 +70,70 @@
         overflow: hidden;
     }
 
+    /* Desktop: the image takes the height of the text next to it, never taller. */
+    .why-us-section .why-us-content {
+        align-items: stretch;
+    }
+
     .why-us-image {
         flex: 1;
         min-width: 0;
         display: flex;
         justify-content: flex-start;
+        position: relative;
+        min-height: 18rem;
     }
 
     .why-us-image img {
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100%;
         max-width: 37.25rem;
-        height: auto;
-        aspect-ratio: 596 / 552;
+        height: 100%;
         border-radius: 1.25rem;
         object-fit: cover;
+    }
+
+    .why-us-points {
+        list-style: none;
+        margin: 1.25rem 0 0;
+        padding: 0;
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    .why-us-points li {
+        position: relative;
+        padding-left: 2rem;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 1rem;
+        line-height: 1.5rem;
+        color: var(--section-text-color, #000);
+    }
+
+    /* Yellow circle with a navy tick */
+    .why-us-points li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0.125rem;
+        width: 1.25rem;
+        height: 1.25rem;
+        border-radius: 50%;
+        background: #FFB400;
+    }
+
+    .why-us-points li::after {
+        content: "";
+        position: absolute;
+        left: 0.45rem;
+        top: 0.38rem;
+        width: 0.3rem;
+        height: 0.55rem;
+        border: solid #0B2240;
+        border-width: 0 0.125rem 0.125rem 0;
+        transform: rotate(45deg);
     }
 
     .why-us-text {
@@ -318,6 +388,18 @@
             max-width: 100%;
         }
 
+        /* Stacked layout: the image keeps its own shape above the text. */
+        .why-us-image {
+            position: static;
+            min-height: 0;
+        }
+
+        .why-us-image img {
+            position: static;
+            height: auto;
+            aspect-ratio: 16 / 10;
+        }
+
         .why-us-text, .sustainable-content {
             max-width: 100%;
             min-width: 0;
@@ -482,17 +564,30 @@
 <main class="why-choose-us">
 
 @include('components.header')
-@include('components.inner-hero', ['page' => 'whyChooseUs'])
+<x-about-hero
+    title="Why Choose Go Custom Boxes"
+    description="From free design support and low minimums to fast production and free shipping, we make custom packaging simple, affordable, and built around your brand."
+    :bgImage="$whyHeroImage"
+    mobileBgImage="uploads/why-choose-us-hero-mobile.webp"
+    breadcrumb="Why Choose Us"
+    overlay="rgba(10, 34, 64, 0.55)"
+/>
 <!-- Section 1: Craftsmanship -->
 <section class="why-us-section">
     <div class="container">
         <div class="why-us-content">
             <div class="why-us-image">
-                <img src="{{ asset($whyUsImage) }}" alt="{{ $whyUsImageAlt }}" loading="lazy">
+                <img src="{{ asset($whyUsImage) }}" alt="{{ $whyUsImageAlt }}" width="1280" height="800" loading="lazy">
             </div>
             <div class="why-us-text">
-                <h2>Craftsmanship Meets Scalable Precision</h2>
-                <p>Unlike standard mass-production manufacturers, we approach every project with the creativity and attention to detail of a dedicated packaging studio. From the initial concept to final production, our experienced team works closely with you to develop custom packaging that reflects your brand's identity while meeting the highest quality standards. With in-house design support, competitive factory-direct pricing, flexible order quantities, and efficient production timelines, we deliver premium packaging solutions that grow alongside your business.</p>
+                <h2>Studio-Level Craftsmanship, Factory-Direct Scale</h2>
+                <p>Every order gets the attention of a dedicated packaging studio and the capacity of a full production facility. Our team helps you choose the right structure, material, and finish, checks your artwork, and prints your boxes on commercial offset and digital presses, so your first 100 boxes look as good as your next 10,000.</p>
+                <ul class="why-us-points">
+                    <li>Free design support and a digital proof before we print</li>
+                    <li>Low minimums from 100 units, with no die or plate charges</li>
+                    <li>Premium finishes: foil stamping, embossing, spot UV, and soft-touch</li>
+                    <li>Production in 8 to 10 business days after proof approval, plus free shipping</li>
+                </ul>
             </div>
         </div>
     </div>
@@ -581,7 +676,7 @@
     </div>
 </section>
 
-@include('components.faq')
+@include('components.faq', ['faqs' => $whyUsFaqs])
 @include('components.cta')
 @include('components.footer')
 
