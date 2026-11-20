@@ -10,9 +10,9 @@
     // FAQs shown on this page (components/faq) and in its FAQPage schema.
     $whyUsFaqs = [
         ['question' => 'What makes Go Custom Boxes different from other packaging suppliers?',
-         'answer' => 'We combine the care of a design studio with factory-direct pricing. Every order includes free graphic design support, a digital proof before production, no die or plate charges, and free shipping.'],
-        ['question' => 'What is your minimum order quantity?',
-         'answer' => 'Our minimum order starts at 100 units for most box styles, so new and growing brands can order custom packaging without buying thousands of boxes. The exact minimum can vary with the box structure and material.'],
+         'answer' => 'We combine the care of a design studio with factory-direct pricing. Every order includes free graphic design support, a digital proof before production, no minimum order quantity, no die or plate charges, and free shipping.'],
+        ['question' => 'Is there a minimum order quantity?',
+         'answer' => 'No. There is no minimum order quantity (No MOQ), so you can order exactly the number of boxes you need, from a small trial run to a large production order.'],
         ['question' => 'Do you charge for design, dies or printing plates?',
          'answer' => 'No. Our design team helps with your artwork for free, and there are no die or plate charges. Your quote covers your boxes and shipping, with no hidden setup fees.'],
         ['question' => 'Will I see my design before production starts?',
@@ -566,7 +566,7 @@
 @include('components.header')
 <x-about-hero
     title="Why Choose Go Custom Boxes"
-    description="From free design support and low minimums to fast production and free shipping, we make custom packaging simple, affordable, and built around your brand."
+    description="From free design support and no minimum order quantity to fast production and free shipping, we make custom packaging simple, affordable, and built around your brand."
     :bgImage="$whyHeroImage"
     mobileBgImage="uploads/why-choose-us-hero-mobile.webp"
     breadcrumb="Why Choose Us"
@@ -581,10 +581,10 @@
             </div>
             <div class="why-us-text">
                 <h2>Studio-Level Craftsmanship, Factory-Direct Scale</h2>
-                <p>Every order gets the attention of a dedicated packaging studio and the capacity of a full production facility. Our team helps you choose the right structure, material, and finish, checks your artwork, and prints your boxes on commercial offset and digital presses, so your first 100 boxes look as good as your next 10,000.</p>
+                <p>Every order gets the attention of a dedicated packaging studio and the capacity of a full production facility. Our team helps you choose the right structure, material, and finish, checks your artwork, and prints your boxes on commercial offset and digital presses, so a small trial order looks as good as a run of 10,000.</p>
                 <ul class="why-us-points">
                     <li>Free design support and a digital proof before we print</li>
-                    <li>Low minimums from 100 units, with no die or plate charges</li>
+                    <li>No minimum order quantity (No MOQ) and no die or plate charges</li>
                     <li>Premium finishes: foil stamping, embossing, spot UV, and soft-touch</li>
                     <li>Production in 8 to 10 business days after proof approval, plus free shipping</li>
                 </ul>
@@ -619,10 +619,10 @@
 
             <div class="trust-card">
                 <span class="trust-icon">
-                    <img src="{{ asset('uploads/low-minimum-order-quantity.svg') }}" alt="Low Minimum Order Quantity" loading="lazy">
+                    <img src="{{ asset('uploads/low-minimum-order-quantity.svg') }}" alt="No Minimum Order Quantity" loading="lazy">
                 </span>
-                <h3>Low Minimum Order Quantity</h3>
-                <p>Flexible quantities to suit every business stage.</p>
+                <h3>No Minimum Order Quantity</h3>
+                <p>Order exactly the quantity you need, big or small.</p>
             </div>
 
             <div class="trust-card">
