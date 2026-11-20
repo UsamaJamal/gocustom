@@ -7,9 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0B2240">
     @php
-        // Hero banner at the top of the page, also used as the share image (og/twitter).
+        // Hero banner at the top of the page, also the share image (og/twitter); both use the alt made from its file name.
         $quoteHeroImage = 'uploads/quotation-hero-Image.webp';
-        $quoteShare = \App\Support\ShareImage::make($quoteHeroImage, 'Custom printed boxes and a branded shopping bag in different styles');
+        $quoteShare = \App\Support\ShareImage::make($quoteHeroImage);
     @endphp
     <title>Get Instant Quote | Go Custom Boxes</title>
     <meta name="description" content="Request your free custom quote for luxury rigid packaging boxes. Fast estimates & high quality custom boxes.">

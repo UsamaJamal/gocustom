@@ -1,10 +1,9 @@
 @php
-    // Hero banner at the top of the page, also used as the share image (og/twitter).
+    // Hero banner at the top of the page, also the share image (og/twitter); both use the alt made from its file name.
     $aboutHeroImage = 'uploads/about-us-hero.webp';
 @endphp
 @include('components.htmlboilerplate', [
     'image' => $aboutHeroImage,
-    'imageAlt' => 'Luxury custom rigid boxes in green, navy, grey and cream',
     'title' => 'About Us | Go Custom Boxes',
     'metaDescription' => 'Learn more about Go Custom Boxes, our commitment to exceptional custom packaging, bespoke box printing, and wholesale packaging solutions.',
     'metaKeywords' => 'about go custom boxes, custom packaging company, box manufacturer usa',

@@ -1,10 +1,9 @@
 @php
-    // Hero banner at the top of the page, also used as the share image (og/twitter).
+    // Hero banner at the top of the page, also the share image (og/twitter); both use the alt made from its file name.
     $faqHeroImage = 'uploads/faqs-hero.webp';
 @endphp
 @include('components.htmlboilerplate', [
     'image' => $faqHeroImage,
-    'imageAlt' => 'Luxury custom rigid boxes in green, navy, grey and cream',
     'title' => 'Frequently Asked Questions | Go Custom Boxes',
     'metaDescription' => 'Get answers to frequently asked questions about custom printed boxes, ordering processes, turnaround times, and materials at Go Custom Boxes.',
     'metaKeywords' => 'custom boxes faqs, packaging questions, box ordering guide',

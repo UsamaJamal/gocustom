@@ -22,9 +22,9 @@
             ? $contactPageMeta->meta_keywords 
             : 'contact go custom boxes, custom packaging quote, box manufacturer usa';
         $contactRobots = !empty($contactPageMeta->robots) ? $contactPageMeta->robots : 'index,follow';
-        // Hero banner at the top of the page, also used as the share image (og/twitter).
+        // Hero banner at the top of the page, also the share image (og/twitter); both use the alt made from its file name.
         $contactHeroImage = 'uploads/contact-us-hero.webp';
-        $contactShare = \App\Support\ShareImage::make($contactHeroImage, 'Go Custom Boxes support team with branded custom boxes');
+        $contactShare = \App\Support\ShareImage::make($contactHeroImage);
     @endphp
 
     <title>{{ $contactMetaTitle }}</title>

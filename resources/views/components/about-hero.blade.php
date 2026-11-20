@@ -8,7 +8,8 @@
     'bg' => null,
     'breadcrumb' => 'About Us',
     'breadcrumbs' => [],
-    'overlay' => 'rgba(0, 0, 0, 0.6)'
+    'overlay' => 'rgba(0, 0, 0, 0.6)',
+    'alt' => null,
 ])
 
 @php
@@ -17,19 +18,53 @@
     $rawBg = $bg ?? $bgImage ?? 'uploads/about-us-hero.webp';
     $finalBg = \Illuminate\Support\Str::startsWith($rawBg, ['http://', 'https://']) ? $rawBg : asset($rawBg);
     $finalMobileBg = $mobileBgImage ? (\Illuminate\Support\Str::startsWith($mobileBgImage, ['http://', 'https://']) ? $mobileBgImage : asset($mobileBgImage)) : $finalBg;
+    // Spaces would split a srcset value, so encode them in both URLs.
+    $finalBg = str_replace(' ', '%20', $finalBg);
+    $finalMobileBg = str_replace(' ', '%20', $finalMobileBg);
+    // The banner is a real <img>, so it has alt text. Same rule as the page's share image
+    // (og:image:alt): the given alt, else a name made from the file name.
+    $finalAlt = trim((string) $alt) !== '' ? trim((string) $alt) : \App\Support\ShareImage::altFromFileName($rawBg);
 @endphp
 
 <style>
     .about-hero-component {
-        background-image: linear-gradient({{ $overlay }}, {{ $overlay }}), url('{{ $finalBg }}');
-        background-size: 100% 100%;
-        background-position: center center;
-        background-repeat: no-repeat;
+        background-color: #0a2240;
         color: #fff;
         padding: 2.5rem 0 6.25rem 0;
         position: relative;
+        overflow: hidden;
         width: 100%;
         box-sizing: border-box;
+    }
+    /* Banner image and its colour overlay sit behind the breadcrumb and heading. The image
+       is stretched to the box (object-fit: fill), as the old background-size: 100% 100% was. */
+    .about-hero-bg,
+    .about-hero-bg img,
+    .about-hero-overlay {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+    .about-hero-bg {
+        display: block;
+        margin: 0;
+    }
+    .about-hero-bg img {
+        display: block;
+        max-width: none;
+        object-fit: fill;
+    }
+    .about-hero-overlay {
+        background: {{ $overlay }};
+    }
+    .about-hero-component .about-hero-container,
+    .about-hero-component .about-hero-content {
+        position: relative;
+        z-index: 1;
     }
     .about-hero-component,
     .about-hero-component * {
@@ -97,11 +132,8 @@
 
     @media (max-width: 48rem) {
         .about-hero-component {
-            background-image: linear-gradient({{ $overlay }}, {{ $overlay }}), url('{{ $finalMobileBg }}');
             padding: 5rem 1.25rem;
             min-height: 460px;
-            background-size: 100% 100%;
-            background-position: center center;
         }
         .about-hero-container {
             padding: 0 !important;
@@ -119,6 +151,13 @@
 </style>
 
 <section class="about-hero-component">
+    <picture class="about-hero-bg">
+        @if($finalMobileBg !== $finalBg)
+            <source media="(max-width: 48rem)" srcset="{{ $finalMobileBg }}">
+        @endif
+        <img src="{{ $finalBg }}" alt="{{ $finalAlt }}" fetchpriority="high">
+    </picture>
+    <span class="about-hero-overlay" aria-hidden="true"></span>
     <div class="about-hero-container" style="text-align: left;">
         <nav class="about-hero-breadcrumb" aria-label="Breadcrumb">
             <a href="/">

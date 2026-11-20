@@ -1,7 +1,6 @@
 @php
-    // Hero banner at the top of the page, also used as the share image (og/twitter).
+    // Hero banner at the top of the page, also the share image (og/twitter); both use the alt made from its file name.
     $whyHeroImage = 'uploads/why-choose-us-hero.webp';
-    $whyHeroImageAlt = 'Go Custom Boxes logo with custom printed shopping bag, perfume box, mailer and gift boxes';
 
     // Image of the craftsmanship section; it is sized to the height of the text next to it.
     $whyUsImage = 'uploads/why-choose-us-craftsmanship.webp';
@@ -25,7 +24,6 @@
 @endphp
 @include('components.htmlboilerplate', [
     'image' => $whyHeroImage,
-    'imageAlt' => $whyHeroImageAlt,
     'faqs' => $whyUsFaqs,
     'title' => 'Why Choose Us | Go Custom Boxes',
     'metaDescription' => 'Discover why brands choose Go Custom Boxes for custom printed packaging, superior structural strength, wholesale pricing, and reliable delivery.',

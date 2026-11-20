@@ -6,9 +6,9 @@
     <meta name="theme-color" content="#0B2240">
     <link rel="icon" href="{{ asset('uploads/go-custom-boxes-favicon.png') }}" type="image/png">
     @php
-        // Hero banner at the top of the page, also used as the share image (og/twitter).
+        // Hero banner at the top of the page, also the share image (og/twitter); both use the alt made from its file name.
         $blogHeroImage = 'uploads/blog-banner.webp';
-        $blogShare = \App\Support\ShareImage::make($blogHeroImage, 'Go Custom Boxes branded mailer, gift and rigid boxes');
+        $blogShare = \App\Support\ShareImage::make($blogHeroImage);
     @endphp
     <title>Packaging Insights & Industry Trends | Go Custom Boxes</title>
     <meta name="description" content="Explore custom packaging insights, trends, design tips, and structural advice for luxury rigid boxes, corrugated cartons, and branded packaging.">
