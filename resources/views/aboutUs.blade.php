@@ -1,9 +1,11 @@
 @php
-    // Hero banner at the top of the page, also the share image (og/twitter); both use the alt made from its file name.
-    $aboutHeroImage = 'uploads/about-us-hero.webp';
+    // Hero banner at the top of the page, also the share image (og/twitter), with the same alt text.
+    $aboutHeroImage = 'uploads/about-go-custom-boxes.webp';
+    $aboutHeroImageAlt = 'about go custom boxes';
 @endphp
 @include('components.htmlboilerplate', [
     'image' => $aboutHeroImage,
+    'imageAlt' => $aboutHeroImageAlt,
     'title' => 'About Us | Go Custom Boxes',
     'metaDescription' => 'Learn more about Go Custom Boxes, our commitment to exceptional custom packaging, bespoke box printing, and wholesale packaging solutions.',
     'metaKeywords' => 'about go custom boxes, custom packaging company, box manufacturer usa',
@@ -265,7 +267,8 @@
     title="About Us"
     description="From box styles and materials to custom sizes, pricing, and delivery, find quick answers to the questions we hear most."
     :bgImage="$aboutHeroImage"
-    mobileBgImage="uploads/about-us-mobile.webp"
+    :alt="$aboutHeroImageAlt"
+    mobileBgImage="uploads/about-go-custom-boxes-mobile.webp"
     breadcrumb="About Us"
 />
 

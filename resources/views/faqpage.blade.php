@@ -1,9 +1,11 @@
 @php
-    // Hero banner at the top of the page, also the share image (og/twitter); both use the alt made from its file name.
-    $faqHeroImage = 'uploads/faqs-hero.webp';
+    // Hero banner at the top of the page, also the share image (og/twitter), with the same alt text.
+    $faqHeroImage = 'uploads/faqs-go-custom-boxes.webp';
+    $faqHeroImageAlt = 'faqs about go custom boxes';
 @endphp
 @include('components.htmlboilerplate', [
     'image' => $faqHeroImage,
+    'imageAlt' => $faqHeroImageAlt,
     'title' => 'Frequently Asked Questions | Go Custom Boxes',
     'metaDescription' => 'Get answers to frequently asked questions about custom printed boxes, ordering processes, turnaround times, and materials at Go Custom Boxes.',
     'metaKeywords' => 'custom boxes faqs, packaging questions, box ordering guide',
@@ -142,7 +144,8 @@
         :title="$settings['faq_page_title'] ?? 'Frequently Asked Questions'"
         description="From box styles and materials to custom sizes, pricing, and delivery, find quick answers to the questions we hear most."
         :bgImage="$faqHeroImage"
-        mobileBgImage="uploads/faqs-mobile-hero.webp"
+        :alt="$faqHeroImageAlt"
+        mobileBgImage="uploads/faqs-go-custom-boxes-mobile.webp"
         breadcrumb="FAQs"
     />
 

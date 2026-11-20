@@ -3,7 +3,7 @@
     'subtitle' => null,
     'description' => null,
     'desc' => null,
-    'bgImage' => 'uploads/about-us-hero.webp',
+    'bgImage' => 'uploads/about-go-custom-boxes.webp',
     'mobileBgImage' => null,
     'bg' => null,
     'breadcrumb' => 'About Us',
@@ -15,7 +15,7 @@
 @php
     $finalTitle = $title ?? 'About Us';
     $finalDesc = $description ?? $desc ?? $subtitle ?? '';
-    $rawBg = $bg ?? $bgImage ?? 'uploads/about-us-hero.webp';
+    $rawBg = $bg ?? $bgImage ?? 'uploads/about-go-custom-boxes.webp';
     $finalBg = \Illuminate\Support\Str::startsWith($rawBg, ['http://', 'https://']) ? $rawBg : asset($rawBg);
     $finalMobileBg = $mobileBgImage ? (\Illuminate\Support\Str::startsWith($mobileBgImage, ['http://', 'https://']) ? $mobileBgImage : asset($mobileBgImage)) : $finalBg;
     // Spaces would split a srcset value, so encode them in both URLs.
@@ -155,7 +155,8 @@
         @if($finalMobileBg !== $finalBg)
             <source media="(max-width: 48rem)" srcset="{{ $finalMobileBg }}">
         @endif
-        <img src="{{ $finalBg }}" alt="{{ $finalAlt }}" fetchpriority="high">
+        {{-- data-keep-alt: the header script that renames every image alt after its file leaves a given alt alone. --}}
+        <img src="{{ $finalBg }}" alt="{{ $finalAlt }}" fetchpriority="high" @if(trim((string) $alt) !== '') data-keep-alt @endif>
     </picture>
     <span class="about-hero-overlay" aria-hidden="true"></span>
     <div class="about-hero-container" style="text-align: left;">

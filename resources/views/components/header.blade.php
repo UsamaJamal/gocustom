@@ -1604,6 +1604,9 @@
         }
 
         function applyImageMetadata(image) {
+            // Images whose alt text was set on purpose (e.g. hero banners) keep it.
+            if (image.hasAttribute('data-keep-alt')) return;
+
             const imageName = imageNameFromSrc(image);
             if (!imageName) return;
 
