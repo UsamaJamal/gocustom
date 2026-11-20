@@ -17,6 +17,14 @@
     RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
     RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L,NE]
 
+    # Redirect directly requested /index.php (and /public/index.php) URLs to the clean URL,
+    # e.g. /index.php -> /, /index.php/kraft-boxes/ -> /kraft-boxes/. Otherwise Laravel serves
+    # the homepage there with every link and the canonical under /public/index.php/.
+    # THE_REQUEST ensures Laravel's internal rewrite to index.php does not trigger this redirect.
+    RewriteCond %{REQUEST_METHOD} ^(?:GET|HEAD)$ [NC]
+    RewriteCond %{THE_REQUEST} \s/+(?:public/+)?index\.php(?:[/?\s]) [NC]
+    RewriteRule ^(?:public/+)?index\.php(?:/+(.*))?$ /$1 [R=301,L,NE]
+
     # Redirect directly requested /public URLs to their clean public equivalent.
     # THE_REQUEST ensures Laravel's internal rewrite does not trigger this redirect.
     RewriteCond %{THE_REQUEST} \s/+public(?:[/?\s]) [NC]
