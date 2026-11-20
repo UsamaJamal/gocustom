@@ -17,9 +17,14 @@
             ? $blog['meta_keywords'] 
             : (!empty(trim((string)($blog['tags'] ?? ''))) ? $blog['tags'] : '');
         $pageRobots = !empty(trim((string)($blog['robots'] ?? ''))) ? $blog['robots'] : 'index,follow';
-        $pageImage = !empty($blog['image']) 
-            ? (\Illuminate\Support\Str::startsWith($blog['image'], ['http://', 'https://']) ? $blog['image'] : asset($blog['image'])) 
-            : asset('uploads/Home-Banner.webp');
+        // Share image = the blog's featured image, with its admin Alt Text, else the blog title
+        // (the alt the featured image has on the page).
+        $pageShare = \App\Support\ShareImage::make(
+            $blog['image'] ?? null,
+            !empty(trim((string) ($blog['alt_text'] ?? ''))) ? $blog['alt_text'] : ($blog['title'] ?? null)
+        );
+        $pageImage = $pageShare['url'];
+        $pageImageAlt = $pageShare['alt'];
         $blogAuthor = !empty(trim((string)($blog['joined_author_name'] ?? ''))) 
             ? trim((string)$blog['joined_author_name']) 
             : (!empty(trim((string)($blog['author_name'] ?? ''))) 
@@ -47,7 +52,7 @@
     @endif
     <meta property="og:url" content="{{ rtrim(url()->current(), '/') }}/">
     <meta property="og:image" content="{{ $pageImage }}">
-    <meta property="og:image:alt" content="{{ !empty($blog['alt_text']) ? $blog['alt_text'] : $pageMetaTitle }}">
+    <meta property="og:image:alt" content="{{ $pageImageAlt }}">
     <meta property="og:site_name" content="Go Custom Boxes">
     @if(!empty($blog['publish_date']))
     <meta property="article:published_time" content="{{ date('c', strtotime($blog['publish_date'])) }}">
@@ -70,7 +75,7 @@
     <meta name="twitter:description" content="{{ $pageMetaDescription }}">
     @endif
     <meta name="twitter:image" content="{{ $pageImage }}">
-    <meta name="twitter:image:alt" content="{{ !empty($blog['alt_text']) ? $blog['alt_text'] : $pageMetaTitle }}">
+    <meta name="twitter:image:alt" content="{{ $pageImageAlt }}">
 
     @include('components.canonical')
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Open+Sans:wght@300;400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">

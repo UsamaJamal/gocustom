@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0B2240">
     <link rel="icon" href="{{ asset('uploads/go-custom-boxes-favicon.png') }}" type="image/png">
+    @php
+        // Hero banner at the top of the page, also used as the share image (og/twitter).
+        $blogHeroImage = 'uploads/blog-banner.webp';
+        $blogShare = \App\Support\ShareImage::make($blogHeroImage, 'Go Custom Boxes branded mailer, gift and rigid boxes');
+    @endphp
     <title>Packaging Insights & Industry Trends | Go Custom Boxes</title>
     <meta name="description" content="Explore custom packaging insights, trends, design tips, and structural advice for luxury rigid boxes, corrugated cartons, and branded packaging.">
     <meta name="keywords" content="custom boxes blog, packaging insights, rigid boxes guide, luxury packaging trends">
@@ -18,16 +23,16 @@
     <meta property="og:title" content="Packaging Insights & Industry Trends | Go Custom Boxes">
     <meta property="og:description" content="Explore custom packaging insights, trends, design tips, and structural advice for luxury rigid boxes, corrugated cartons, and branded packaging.">
     <meta property="og:url" content="{{ rtrim(url('/blog'), '/') }}/">
-    <meta property="og:image" content="{{ asset('uploads/Home-Banner.webp') }}">
-    <meta property="og:image:alt" content="Packaging Insights & Industry Trends | Go Custom Boxes">
+    <meta property="og:image" content="{{ $blogShare['url'] }}">
+    <meta property="og:image:alt" content="{{ $blogShare['alt'] }}">
     <meta property="og:site_name" content="Go Custom Boxes">
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Packaging Insights & Industry Trends | Go Custom Boxes">
     <meta name="twitter:description" content="Explore custom packaging insights, trends, design tips, and structural advice for luxury rigid boxes, corrugated cartons, and branded packaging.">
-    <meta name="twitter:image" content="{{ asset('uploads/Home-Banner.webp') }}">
-    <meta name="twitter:image:alt" content="Packaging Insights & Industry Trends | Go Custom Boxes">
+    <meta name="twitter:image" content="{{ $blogShare['url'] }}">
+    <meta name="twitter:image:alt" content="{{ $blogShare['alt'] }}">
 
     @include('components.canonical')
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Open+Sans:wght@300;400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -366,7 +371,7 @@
         <x-about-hero 
             title="Blog"
             description="Discover packaging ideas, industry trends, design inspiration, and practical tips to help your brand stand out."
-            bgImage="uploads/blog-banner.webp"
+            :bgImage="$blogHeroImage"
             mobileBgImage="uploads/blog-banner-mobile.webp"
           
             breadcrumb="Blog"

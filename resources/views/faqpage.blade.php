@@ -1,4 +1,10 @@
+@php
+    // Hero banner at the top of the page, also used as the share image (og/twitter).
+    $faqHeroImage = 'uploads/faqs-hero.webp';
+@endphp
 @include('components.htmlboilerplate', [
+    'image' => $faqHeroImage,
+    'imageAlt' => 'Luxury custom rigid boxes in green, navy, grey and cream',
     'title' => 'Frequently Asked Questions | Go Custom Boxes',
     'metaDescription' => 'Get answers to frequently asked questions about custom printed boxes, ordering processes, turnaround times, and materials at Go Custom Boxes.',
     'metaKeywords' => 'custom boxes faqs, packaging questions, box ordering guide',
@@ -136,7 +142,7 @@
     <x-about-hero 
         :title="$settings['faq_page_title'] ?? 'Frequently Asked Questions'"
         description="From box styles and materials to custom sizes, pricing, and delivery, find quick answers to the questions we hear most."
-        bgImage="uploads/faqs-hero.webp"
+        :bgImage="$faqHeroImage"
         mobileBgImage="uploads/faqs-mobile-hero.webp"
         breadcrumb="FAQs"
     />

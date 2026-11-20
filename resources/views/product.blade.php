@@ -15,9 +15,17 @@
             : (!empty(trim((string)($product['description'] ?? ''))) ? trim(strip_tags((string)$product['description'])) : 'Custom printed rigid packaging boxes at wholesale rates. Premium luxury boxes for retail, cosmetic, and gift packaging.');
         $prodMetaKeywords = !empty(trim((string)($product['meta_keywords'] ?? ''))) ? $product['meta_keywords'] : '';
         $prodRobots = !empty(trim((string)($product['robots'] ?? ''))) ? $product['robots'] : 'index,follow';
-        $prodImg = !empty($product['image']) 
-            ? (\Illuminate\Support\Str::startsWith($product['image'], ['http://', 'https://']) ? $product['image'] : asset($product['image'])) 
-            : asset('uploads/Home-Banner.webp');
+        // Share image = the product's main image (else its first gallery image), with the same
+        // alt text as the main image on the page: the admin Alt Text, else the product title.
+        $prodGallery = !empty($product['images'])
+            ? (is_string($product['images']) ? (json_decode($product['images'], true) ?: []) : (array) $product['images'])
+            : [];
+        $prodShare = \App\Support\ShareImage::make(
+            !empty($product['image']) ? $product['image'] : ($prodGallery[0] ?? null),
+            !empty(trim((string) ($product['alt_text'] ?? ''))) ? $product['alt_text'] : ($product['title'] ?? null)
+        );
+        $prodImg = $prodShare['url'];
+        $prodImgAlt = $prodShare['alt'];
     @endphp
 
     <title>{{ $prodMetaTitle }}</title>
@@ -40,7 +48,7 @@
     @endif
     <meta property="og:url" content="{{ rtrim(url()->current(), '/') }}/">
     <meta property="og:image" content="{{ $prodImg }}">
-    <meta property="og:image:alt" content="{{ $prodMetaTitle }}">
+    <meta property="og:image:alt" content="{{ $prodImgAlt }}">
     <meta property="og:site_name" content="Go Custom Boxes">
 
     <!-- Twitter -->
@@ -50,7 +58,7 @@
     <meta name="twitter:description" content="{{ $prodMetaDescription }}">
     @endif
     <meta name="twitter:image" content="{{ $prodImg }}">
-    <meta name="twitter:image:alt" content="{{ $prodMetaTitle }}">
+    <meta name="twitter:image:alt" content="{{ $prodImgAlt }}">
 
     @include('components.canonical')
     <link rel="preconnect" href="https://fonts.googleapis.com">

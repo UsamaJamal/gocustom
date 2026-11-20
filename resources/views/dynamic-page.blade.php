@@ -6,7 +6,7 @@
     $pageImage = !empty($page['image']) ? $page['image'] : null;
     $pageFaqs = !empty($page['faqs']) ? (json_decode($page['faqs'], true) ?: []) : [];
 @endphp
-@include('components.htmlboilerplate', ['title' => $title, 'metaDescription' => $metaDescription, 'metaKeywords' => $metaKeywords, 'robots' => $robots, 'image' => $pageImage, 'schema' => $page['schema'] ?? ''])
+@include('components.htmlboilerplate', ['title' => $title, 'metaDescription' => $metaDescription, 'metaKeywords' => $metaKeywords, 'robots' => $robots, 'image' => $pageImage, 'imageAlt' => $page['alt_text'] ?? null, 'schema' => $page['schema'] ?? ''])
 <style>
     .dynamic-hero {
         background-color: #ffffff;

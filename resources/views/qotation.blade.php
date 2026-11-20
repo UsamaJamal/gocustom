@@ -6,6 +6,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0B2240">
+    @php
+        // Hero banner at the top of the page, also used as the share image (og/twitter).
+        $quoteHeroImage = 'uploads/quotation-hero-Image.webp';
+        $quoteShare = \App\Support\ShareImage::make($quoteHeroImage, 'Custom printed boxes and a branded shopping bag in different styles');
+    @endphp
     <title>Get Instant Quote | Go Custom Boxes</title>
     <meta name="description" content="Request your free custom quote for luxury rigid packaging boxes. Fast estimates & high quality custom boxes.">
     <meta name="robots" content="index,follow">
@@ -18,16 +23,16 @@
     <meta property="og:title" content="Get Instant Quote | Go Custom Boxes">
     <meta property="og:description" content="Request your free custom quote for luxury rigid packaging boxes. Fast estimates & high quality custom boxes.">
     <meta property="og:url" content="{{ rtrim(url('/request-quote'), '/') }}/">
-    <meta property="og:image" content="{{ asset('uploads/Home-Banner.webp') }}">
-    <meta property="og:image:alt" content="Get Instant Custom Packaging Quote - Go Custom Boxes">
+    <meta property="og:image" content="{{ $quoteShare['url'] }}">
+    <meta property="og:image:alt" content="{{ $quoteShare['alt'] }}">
     <meta property="og:site_name" content="Go Custom Boxes">
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Get Instant Quote | Go Custom Boxes">
     <meta name="twitter:description" content="Request your free custom quote for luxury rigid packaging boxes. Fast estimates & high quality custom boxes.">
-    <meta name="twitter:image" content="{{ asset('uploads/Home-Banner.webp') }}">
-    <meta name="twitter:image:alt" content="Get Instant Custom Packaging Quote - Go Custom Boxes">
+    <meta name="twitter:image" content="{{ $quoteShare['url'] }}">
+    <meta name="twitter:image:alt" content="{{ $quoteShare['alt'] }}">
     
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -504,7 +509,7 @@
         <x-about-hero 
             title="Get A Free Quote"
             description="Tell us about your packaging needs and our team will create a custom quote around your product, brand, and requirements."
-            bgImage="uploads/quotation-hero-Image.webp"
+            :bgImage="$quoteHeroImage"
             mobileBgImage="uploads/quotation-hero-image-mbl.webp"
             breadcrumb="Get a Quote"
         />

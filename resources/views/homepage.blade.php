@@ -9,6 +9,8 @@
     @php
         $homeTitle = !empty($settings['meta_title']) ? $settings['meta_title'] : 'Custom Printed Boxes & Luxury Packaging | Go Custom Boxes';
         $homeDesc = !empty($settings['meta_description']) ? $settings['meta_description'] : 'Custom printed rigid packaging boxes at wholesale rates. Premium luxury boxes for retail, cosmetic, and gift packaging.';
+        // Share image = the hero image set in the admin panel, with the same alt text as on the page.
+        $homeShare = \App\Support\ShareImage::make($settings['hero_image'] ?? null);
     @endphp
     <title>{{ $homeTitle }}</title>
     <meta name="description" content="{{ $homeDesc }}">
@@ -25,16 +27,16 @@
     <meta property="og:title" content="{{ $homeTitle }}">
     <meta property="og:description" content="{{ $homeDesc }}">
     <meta property="og:url" content="{{ rtrim(url('/'), '/') }}">
-    <meta property="og:image" content="{{ asset('uploads/Home-Banner.webp') }}">
-    <meta property="og:image:alt" content="{{ $homeTitle }}">
+    <meta property="og:image" content="{{ $homeShare['url'] }}">
+    <meta property="og:image:alt" content="{{ $homeShare['alt'] }}">
     <meta property="og:site_name" content="Go Custom Boxes">
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ $homeTitle }}">
     <meta name="twitter:description" content="{{ $homeDesc }}">
-    <meta name="twitter:image" content="{{ asset('uploads/Home-Banner.webp') }}">
-    <meta name="twitter:image:alt" content="{{ $homeTitle }}">
+    <meta name="twitter:image" content="{{ $homeShare['url'] }}">
+    <meta name="twitter:image:alt" content="{{ $homeShare['alt'] }}">
 
     @include('components.canonical')
     <!-- Fonts -->

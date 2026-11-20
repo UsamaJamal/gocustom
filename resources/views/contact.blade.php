@@ -22,6 +22,9 @@
             ? $contactPageMeta->meta_keywords 
             : 'contact go custom boxes, custom packaging quote, box manufacturer usa';
         $contactRobots = !empty($contactPageMeta->robots) ? $contactPageMeta->robots : 'index,follow';
+        // Hero banner at the top of the page, also used as the share image (og/twitter).
+        $contactHeroImage = 'uploads/contact-us-hero.webp';
+        $contactShare = \App\Support\ShareImage::make($contactHeroImage, 'Go Custom Boxes support team with branded custom boxes');
     @endphp
 
     <title>{{ $contactMetaTitle }}</title>
@@ -39,16 +42,16 @@
     <meta property="og:title" content="{{ $contactMetaTitle }}">
     <meta property="og:description" content="{{ $contactMetaDescription }}">
     <meta property="og:url" content="{{ rtrim(url('/contact-us'), '/') }}/">
-    <meta property="og:image" content="{{ asset('uploads/Home-Banner.webp') }}">
-    <meta property="og:image:alt" content="{{ $contactMetaTitle }}">
+    <meta property="og:image" content="{{ $contactShare['url'] }}">
+    <meta property="og:image:alt" content="{{ $contactShare['alt'] }}">
     <meta property="og:site_name" content="Go Custom Boxes">
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ $contactMetaTitle }}">
     <meta name="twitter:description" content="{{ $contactMetaDescription }}">
-    <meta name="twitter:image" content="{{ asset('uploads/Home-Banner.webp') }}">
-    <meta name="twitter:image:alt" content="{{ $contactMetaTitle }}">
+    <meta name="twitter:image" content="{{ $contactShare['url'] }}">
+    <meta name="twitter:image:alt" content="{{ $contactShare['alt'] }}">
 
     @include('components.canonical')
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -512,7 +515,7 @@
         <x-about-hero 
             title="Contact Us"
             description="Have a question, need help with a project, or ready to create custom packaging? Our team is here to help you find the right solution."
-            bgImage="uploads/contact-us-hero.webp"
+            :bgImage="$contactHeroImage"
             mobileBgImage="uploads/contact-us-hero-image-mbl.webp"
             breadcrumb="Contact Us"
             overlay="rgba(10, 34, 64, 0.5)"

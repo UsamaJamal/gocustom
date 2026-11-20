@@ -1,4 +1,12 @@
+@php
+    // Main image of the page, also used as the share image (og/twitter). The page's hero
+    // banner (components/inner-hero) is a CSS background, so this is the first real image.
+    $whyUsImage = 'uploads/craftmenship.png';
+    $whyUsImageAlt = 'Premium custom packaging craftsmanship';
+@endphp
 @include('components.htmlboilerplate', [
+    'image' => $whyUsImage,
+    'imageAlt' => $whyUsImageAlt,
     'title' => 'Why Choose Us | Go Custom Boxes',
     'metaDescription' => 'Discover why brands choose Go Custom Boxes for custom printed packaging, superior structural strength, wholesale pricing, and reliable delivery.',
     'metaKeywords' => 'why choose go custom boxes, custom packaging benefits, box printing quality',
@@ -480,7 +488,7 @@
     <div class="container">
         <div class="why-us-content">
             <div class="why-us-image">
-                <img src="{{ asset('uploads/craftmenship.png') }}" alt="Why Us" loading="lazy">
+                <img src="{{ asset($whyUsImage) }}" alt="{{ $whyUsImageAlt }}" loading="lazy">
             </div>
             <div class="why-us-text">
                 <h2>Craftsmanship Meets Scalable Precision</h2>

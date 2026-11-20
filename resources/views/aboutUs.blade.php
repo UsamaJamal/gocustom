@@ -1,4 +1,10 @@
+@php
+    // Hero banner at the top of the page, also used as the share image (og/twitter).
+    $aboutHeroImage = 'uploads/about-us-hero.webp';
+@endphp
 @include('components.htmlboilerplate', [
+    'image' => $aboutHeroImage,
+    'imageAlt' => 'Luxury custom rigid boxes in green, navy, grey and cream',
     'title' => 'About Us | Go Custom Boxes',
     'metaDescription' => 'Learn more about Go Custom Boxes, our commitment to exceptional custom packaging, bespoke box printing, and wholesale packaging solutions.',
     'metaKeywords' => 'about go custom boxes, custom packaging company, box manufacturer usa',
@@ -259,7 +265,7 @@
 <x-about-hero 
     title="About Us"
     description="From box styles and materials to custom sizes, pricing, and delivery, find quick answers to the questions we hear most."
-    bgImage="uploads/about-us-hero.webp"
+    :bgImage="$aboutHeroImage"
     mobileBgImage="uploads/about-us-mobile.webp"
     breadcrumb="About Us"
 />

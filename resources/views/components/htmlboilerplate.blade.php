@@ -25,11 +25,10 @@
     @php
         $bpPath = trim(request()->path(), '/');
         $bpUrl = $bpPath === '' ? rtrim(url('/'), '/') : rtrim(url('/' . $bpPath), '/') . '/';
-        $bpImage = !empty($image) 
-            ? (\Illuminate\Support\Str::startsWith($image, ['http://', 'https://']) ? $image : asset($image)) 
-            : (!empty($ogImage) 
-                ? (\Illuminate\Support\Str::startsWith($ogImage, ['http://', 'https://']) ? $ogImage : asset($ogImage)) 
-                : asset('uploads/Home-Banner.webp'));
+        // Share image = the page's own image ('image', with its 'imageAlt'), else the site default.
+        $bpShare = \App\Support\ShareImage::make(!empty($image) ? $image : ($ogImage ?? null), $imageAlt ?? null);
+        $bpImage = $bpShare['url'];
+        $bpImageAlt = $bpShare['alt'];
     @endphp
 
     <!-- Open Graph / Facebook -->
@@ -39,7 +38,7 @@
     <meta property="og:description" content="{{ $bpDesc }}">
     <meta property="og:url" content="{{ $bpUrl }}">
     <meta property="og:image" content="{{ $bpImage }}">
-    <meta property="og:image:alt" content="{{ $bpTitle }}">
+    <meta property="og:image:alt" content="{{ $bpImageAlt }}">
     <meta property="og:site_name" content="Go Custom Boxes">
 
     <!-- Twitter -->
@@ -47,7 +46,7 @@
     <meta name="twitter:title" content="{{ $bpTitle }}">
     <meta name="twitter:description" content="{{ $bpDesc }}">
     <meta name="twitter:image" content="{{ $bpImage }}">
-    <meta name="twitter:image:alt" content="{{ $bpTitle }}">
+    <meta name="twitter:image:alt" content="{{ $bpImageAlt }}">
 
     @include('components.canonical')
     <!-- Import Fonts -->
