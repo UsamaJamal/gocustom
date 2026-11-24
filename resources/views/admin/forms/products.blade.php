@@ -221,23 +221,69 @@
                 <label>Image Alt Text</label>
                 <input name="alt_text" value="{{ $v('alt_text') }}">
             </div>
-            <div class="field">
-                <label>Product Gallery</label>
-                @if($editing && !empty($item['images']))
-                    @php $imgs = is_string($item['images']) ? json_decode($item['images'], true) : $item['images']; @endphp
-                    @if(is_array($imgs))
-                        <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem; flex-wrap:wrap">
-                            @foreach($imgs as $img)
-                                <div class="gallery-image-wrapper" style="position:relative; display:inline-block;">
-                                    <img src="{{ $resolveImg($img) }}" style="height:3.75rem; border-radius:0.25rem; border:1px solid #ddd; display:block;">
-                                    <span onclick="removeGalleryImage(this, '{{ addslashes($img) }}')" style="position:absolute; top:-0.375rem; right:-0.375rem; background:#e74c3c; color:white; border-radius:50%; width:1.125rem; height:1.125rem; display:flex; align-items:center; justify-content:center; font-size:0.875rem; font-weight:bold; cursor:pointer; box-shadow:0 1px 0.1875rem rgba(0,0,0,0.3); line-height:1;" title="Remove Image">&times;</span>
+            <div class="field full" style="margin-top: 0.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.625rem; flex-wrap: wrap; gap: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--line);">
+                    <div>
+                        <label style="font-weight: 700; font-size: 0.9375rem; color: var(--text); margin-bottom: 0.125rem; display: block;">Product Gallery (Max 4 Images)</label>
+                        <small style="color: var(--muted); font-size: 0.8125rem;">Upload or replace the 4 gallery images for this product (Image 1 to 4). Choose a file to upload or click trash to clear.</small>
+                    </div>
+                </div>
+
+                @php
+                    $imgs = [];
+                    if (!empty($item['images'])) {
+                        $imgs = is_string($item['images']) ? (json_decode($item['images'], true) ?: []) : (array) $item['images'];
+                    }
+                    $imgs = array_values($imgs);
+                @endphp
+
+                <div id="galleryRowsContainer" style="display: flex; flex-direction: column; gap: 0.625rem;">
+                    @for($slot = 1; $slot <= 4; $slot++)
+                        @php
+                            $idx = $slot - 1;
+                            $existingImg = $imgs[$idx] ?? null;
+                            $hasValidImg = !empty($existingImg) && file_exists(public_path($existingImg));
+                        @endphp
+                        <div class="gallery-row" data-slot="{{ $slot }}" style="display: flex; align-items: center; gap: 0.875rem; background: #fff; padding: 0.625rem 0.875rem; border: 1px solid var(--line); border-radius: 0.5625rem; box-shadow: 0 2px 6px rgba(11,34,64,0.03); flex-wrap: wrap;">
+                            <!-- Slot Number Badge (No arrows!) -->
+                            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 3.25rem; height: 3.25rem; background: var(--soft); border: 1px solid #f2d78e; border-radius: 0.5rem; flex-shrink: 0;" title="Gallery Slot {{ $slot }}">
+                                <span style="font-size: 0.625rem; font-weight: 800; color: #8a6200; text-transform: uppercase; letter-spacing: 0.05em;">Image</span>
+                                <b style="font-size: 1.125rem; color: #0B2240; line-height: 1.1;">{{ $slot }}</b>
+                                <input type="hidden" name="gallery_order[{{ $idx }}]" value="{{ $slot }}">
+                            </div>
+
+                            <!-- Image Info & File input -->
+                            <div style="flex: 1; min-width: 14rem;">
+                                <input type="hidden" name="gallery_existing[{{ $idx }}]" value="{{ $existingImg }}" class="gallery-existing-input">
+                                
+                                <div class="existing-file-info" style="display: {{ !empty($existingImg) ? 'flex' : 'none' }}; align-items: center; gap: 0.5rem; margin-bottom: 0.3125rem;">
+                                    <i class="fa-solid fa-image" style="color: var(--primary); font-size: 0.875rem;"></i>
+                                    <span class="existing-filename" style="font-size: 0.8125rem; color: var(--text); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 20rem;" title="{{ $existingImg }}">{{ basename($existingImg) }}</span>
+                                    <span class="existing-badge" style="font-size: 0.6875rem; background: var(--soft); color: #8a6200; border: 1px solid #f2d78e; padding: 2px 7px; border-radius: 4px; font-weight: 700;">Saved</span>
                                 </div>
-                            @endforeach
+                                <input type="file" name="gallery_file[{{ $idx }}]" accept="image/*" class="gallery-file-input form-input" onchange="previewGalleryRow(this, {{ $idx }})" style="padding: 0.35rem 0.5rem; font-size: 0.8125rem; border: 1px solid var(--line); border-radius: 0.375rem; width: 100%;" title="Choose image for slot {{ $slot }}">
+                            </div>
+
+                            <!-- Remove / Clear Button -->
+                            <div>
+                                <button type="button" onclick="clearGallerySlot(this, {{ $idx }})" class="btn danger" style="padding: 0.4375rem 0.625rem; font-size: 0.8125rem; border: 1px solid #fecaca; border-radius: 0.4375rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem;" title="Clear Image {{ $slot }}">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+
+                            <!-- Preview Box -->
+                            <div class="gallery-preview-box" id="gallery-preview-{{ $idx }}" style="width: 4rem; height: 4rem; border: 1.5px solid var(--line); border-radius: 0.4375rem; display: flex; align-items: center; justify-content: center; background: #faf9f6; overflow: hidden; flex-shrink: 0; box-shadow: inset 0 1px 3px rgba(0,0,0,0.04);" title="Image {{ $slot }} Preview">
+                                @if($hasValidImg)
+                                    <img class="gallery-img-preview" src="{{ asset($existingImg) }}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 0.25rem;">
+                                @elseif(!empty($existingImg))
+                                    <img class="gallery-img-preview" src="{{ $resolveImg($existingImg) }}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 0.25rem;" onerror="this.onerror=null; this.parentElement.innerHTML='<span style=\'font-size:0.625rem;color:var(--muted);font-weight:700;\'>NO IMG</span>';">
+                                @else
+                                    <span style="font-size: 0.625rem; color: var(--muted); text-transform: uppercase; font-weight: 700;">Empty</span>
+                                @endif
+                            </div>
                         </div>
-                    @endif
-                @endif
-                <input type="hidden" name="existing_images" value="{{ json_encode($imgs ?? []) }}">
-                <input type="file" name="images[]" accept="image/*" multiple>
+                    @endfor
+                </div>
             </div>
         </div>
     </div>
@@ -467,16 +513,46 @@
         updateMultiselectDisplay(containerId);
     }
 
-    function removeGalleryImage(btn, imgPath) {
-        if (!confirm('Are you sure you want to remove this image?')) return;
-        const wrapper = btn.closest('.gallery-image-wrapper');
-        const input = document.querySelector('input[name="existing_images"]');
-        if (input && wrapper) {
-            let existing = [];
-            try { existing = JSON.parse(input.value); } catch(e) {}
-            existing = existing.filter(img => img !== imgPath);
-            input.value = JSON.stringify(existing);
-            wrapper.remove();
+    function previewGalleryRow(input, idx) {
+        const row = input.closest('.gallery-row');
+        if (!row) return;
+        const previewBox = row.querySelector('.gallery-preview-box');
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewBox.innerHTML = `<img class="gallery-img-preview" src="${e.target.result}" style="width:100%; height:100%; object-fit:contain; border-radius:0.25rem;">`;
+            };
+            reader.readAsDataURL(file);
+
+            let infoDiv = row.querySelector('.existing-file-info');
+            if (!infoDiv) {
+                infoDiv = document.createElement('div');
+                infoDiv.className = 'existing-file-info';
+                infoDiv.style = 'display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3125rem;';
+                input.parentNode.insertBefore(infoDiv, input);
+            }
+            infoDiv.innerHTML = `
+                <i class="fa-solid fa-image" style="color: var(--primary); font-size: 0.875rem;"></i>
+                <span class="existing-filename" style="font-size: 0.8125rem; color: var(--text); font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 20rem;" title="${file.name}">${file.name}</span>
+                <span class="existing-badge" style="font-size: 0.6875rem; background: #eaf8ef; color: #287a45; border: 1px solid #bbf7d0; padding: 2px 7px; border-radius: 4px; font-weight: 700;">New Selected</span>
+            `;
+            infoDiv.style.display = 'flex';
+        }
+    }
+
+    function clearGallerySlot(btn, idx) {
+        const row = btn.closest('.gallery-row');
+        if (!row) return;
+        const fileInput = row.querySelector('input[type="file"]');
+        if (fileInput) fileInput.value = '';
+        const existingInput = row.querySelector('.gallery-existing-input');
+        if (existingInput) existingInput.value = '';
+        const fileInfo = row.querySelector('.existing-file-info');
+        if (fileInfo) fileInfo.style.display = 'none';
+        const previewBox = row.querySelector('.gallery-preview-box');
+        if (previewBox) {
+            previewBox.innerHTML = '<span style="font-size: 0.625rem; color: var(--muted); text-transform: uppercase; font-weight: 700;">Empty</span>';
         }
     }
 

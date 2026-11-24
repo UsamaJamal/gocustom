@@ -19,6 +19,7 @@ class AdminFooterController extends Controller
             'company_phone' => '1800-315-8441',
             'company_address' => '4000 N Montrose Ave<br>550 Chicago, IL 60641',
             'footer_categories' => [],
+            'footer_products' => [],
             'footer_quick_links' => [],
             'footer_policy_pages' => [],
             'footer_description' => 'The Rigid Boxes is a leading custom packaging manufacturer, delivering premium boxes and packaging solutions tailored to your brand. From design to delivery, we ensure unmatched quality, style, and customer service.',
@@ -73,8 +74,9 @@ class AdminFooterController extends Controller
         $settings = $this->getSettings();
         $categories = DB::table('admin_categories')->get()->map(fn($r) => (array)$r)->all();
         $pages = DB::table('admin_pages')->where('status', 'published')->orderBy('title')->get()->map(fn($r) => (array)$r)->all();
+        $products = DB::table('admin_products')->where('status', 'published')->orderBy('title')->get()->map(fn($r) => (array)$r)->all();
         
-        return view('admin.footer_settings', compact('settings', 'categories', 'pages'));
+        return view('admin.footer_settings', compact('settings', 'categories', 'pages', 'products'));
     }
 
     public function update(Request $request)
@@ -84,6 +86,7 @@ class AdminFooterController extends Controller
             'company_phone' => 'nullable|string|max:100',
             'company_address' => 'nullable|string',
             'footer_categories' => 'nullable|array',
+            'footer_products' => 'nullable|array',
             'footer_policy_pages' => 'nullable|array',
             'footer_description' => 'nullable|string|max:2000',
             'footer_quick_links_names' => 'nullable|array',
@@ -107,7 +110,8 @@ class AdminFooterController extends Controller
         $settings['social_pinterest'] = $request->input('social_pinterest');
         $settings['social_linkedin'] = $request->input('social_linkedin');
         $settings['social_youtube'] = $request->input('social_youtube');
-        $settings['footer_categories'] = array_map('intval', (array) $request->input('footer_categories', []));
+        $settings['footer_categories'] = array_slice(array_map('intval', (array) $request->input('footer_categories', [])), 0, 5);
+        $settings['footer_products'] = array_slice(array_values(array_map('intval', (array) $request->input('footer_products', []))), 0, 5);
         $settings['footer_policy_pages'] = array_values(array_map('intval', (array) $request->input('footer_policy_pages', [])));
         $settings['footer_description'] = $request->input('footer_description');
 
@@ -123,13 +127,13 @@ class AdminFooterController extends Controller
                 ];
             }
         }
-        $settings['footer_quick_links'] = $quickLinks;
+        $settings['footer_quick_links'] = array_slice($quickLinks, 0, 5);
 
         foreach ($settings as $key => $value) {
             $valueType = 'text';
             $section = 'company_info';
 
-            if (in_array($key, ['footer_categories', 'footer_quick_links', 'footer_policy_pages'])) {
+            if (in_array($key, ['footer_categories', 'footer_products', 'footer_quick_links', 'footer_policy_pages'])) {
                 $section = 'footer';
                 $valueType = 'json';
                 $value = json_encode($value);

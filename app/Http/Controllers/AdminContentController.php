@@ -156,7 +156,7 @@ class AdminContentController extends Controller
 
         $request->validate($rules);
         $fields = $columns;
-        $payload = collect($request->except(['_token','_method','images','existing_images','image','nav_image','hero_image','banner_image','icon','categories','related','faq_question','faq_answer']))->only($fields)->all();
+        $payload = collect($request->except(['_token','_method','images','existing_images','gallery_order','gallery_existing','gallery_file','image','nav_image','hero_image','banner_image','icon','categories','related','faq_question','faq_answer']))->only($fields)->all();
         \Log::info('AdminContentController payload for ' . $module, $payload);
         $payload['title'] = $request->title; $payload['slug'] = Str::slug($request->slug ?: $request->title); $payload['updated_at'] = now();
 
@@ -255,29 +255,76 @@ class AdminContentController extends Controller
             }
         }
         if (in_array('images', $fields, true)) {
-            $existingImages = json_decode((string) $request->input('existing_images', '[]'), true) ?: [];
-            
-            $galleryFiles = array_filter((array) $request->file('images'), function ($file) {
-                return $file && $file->isValid();
-            });
+            $galleryOrders = (array) $request->input('gallery_order', []);
+            $galleryExistings = (array) $request->input('gallery_existing', []);
+            $galleryFiles = (array) $request->file('gallery_file', []);
 
-            $newImages = [];
-            if ($galleryFiles) {
+            if (!empty($galleryOrders) || !empty($galleryExistings) || !empty($galleryFiles)) {
                 $uploadPath = public_path('uploads');
                 if (!is_dir($uploadPath)) {
                     mkdir($uploadPath, 0775, true);
                 }
-                $newImages = collect($galleryFiles)
-                    ->map(function ($file) use ($uploadPath) {
-                        $fileName = $file->getClientOriginalName();
-                        $file->move($uploadPath, $fileName);
-                        return 'uploads/' . $fileName;
-                    })
-                    ->values()
-                    ->all();
+
+                $orderedList = [];
+
+                foreach ($galleryOrders as $key => $orderVal) {
+                    $order = (int) $orderVal;
+                    $existingPath = trim((string) ($galleryExistings[$key] ?? ''));
+                    $file = $galleryFiles[$key] ?? null;
+
+                    $targetPath = null;
+                    if ($file && $file->isValid()) {
+                        $safeName = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
+                        $file->move($uploadPath, $safeName);
+                        $targetPath = 'uploads/' . $safeName;
+                    } elseif (!empty($existingPath)) {
+                        $targetPath = $existingPath;
+                    }
+
+                    if (!empty($targetPath)) {
+                        $orderedList[] = [
+                            'order' => $order,
+                            'path' => $targetPath,
+                            'key' => $key,
+                        ];
+                    }
+                }
+
+                usort($orderedList, function ($a, $b) {
+                    if ($a['order'] === $b['order']) {
+                        return $a['key'] <=> $b['key'];
+                    }
+                    return $a['order'] <=> $b['order'];
+                });
+
+                $finalImages = array_values(array_map(fn($item) => $item['path'], $orderedList));
+                $finalImages = array_slice($finalImages, 0, 4);
+                $payload['images'] = json_encode($finalImages);
+            } else {
+                $existingImages = json_decode((string) $request->input('existing_images', '[]'), true) ?: [];
+                
+                $galleryFiles = array_filter((array) $request->file('images'), function ($file) {
+                    return $file && $file->isValid();
+                });
+
+                $newImages = [];
+                if ($galleryFiles) {
+                    $uploadPath = public_path('uploads');
+                    if (!is_dir($uploadPath)) {
+                        mkdir($uploadPath, 0775, true);
+                    }
+                    $newImages = collect($galleryFiles)
+                        ->map(function ($file) use ($uploadPath) {
+                            $fileName = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
+                            $file->move($uploadPath, $fileName);
+                            return 'uploads/' . $fileName;
+                        })
+                        ->values()
+                        ->all();
+                }
+                
+                $payload['images'] = json_encode(array_values(array_merge($existingImages, $newImages)));
             }
-            
-            $payload['images'] = json_encode(array_values(array_merge($existingImages, $newImages)));
         }
         foreach (['images','related'] as $jsonField) if (array_key_exists($jsonField,$payload) && is_array($payload[$jsonField])) $payload[$jsonField] = json_encode($payload[$jsonField]);
         if ($existing) {

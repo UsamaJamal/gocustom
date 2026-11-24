@@ -424,15 +424,15 @@
     .mega-menu-item {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
+        gap: 0.625rem;
         padding: 0.25rem 0.25rem;
         border-radius: 0.375rem;
         text-decoration: none;
         color: #1A1A1A;
         font-family: 'DM Sans', 'Plus Jakarta Sans', sans-serif;
-        font-size: 0.9375rem;
-        font-weight: 600;
-        line-height: 1.35;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        line-height: 1.25;
         transition: color 0.15s ease, transform 0.15s ease, background 0.15s ease;
     }
 
@@ -1111,7 +1111,7 @@
         <ul class="header-nav" style="display: flex; align-items: center; justify-content: center; margin: 0; padding: 0; list-style: none; flex-grow: 1; gap: 1.75rem;">
             <li><a href="/" style="color: #000000; text-decoration: none; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.9375rem;">Home</a></li>
             <li class="has-mega" data-mega-type="custom-boxes">
-                <a href="{{ url('/popular-products/') }}" class="mega-trigger" aria-haspopup="true" style="color: #000000; text-decoration: none; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.9375rem;">Hot Products</a>
+                <a href="{{ url('/popular-products') }}/" class="mega-trigger" aria-haspopup="true" style="color: #000000; text-decoration: none; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.9375rem;">Popular Products</a>
             </li>
             @foreach($navParentItems as $navParent)
             <li class="has-mega" data-mega-type="{{ $navParent['slug'] }}">
@@ -1205,8 +1205,8 @@
                 </li>
                 <li class="mobile-nav-item has-dropdown">
                     <div class="mobile-nav-header">
-                        <a href="{{ url('/popular-products/') }}" class="mobile-nav-link-top">Hot Products</a>
-                        <button type="button" class="mobile-dropdown-toggle" aria-label="Toggle Hot product dropdown" onclick="this.closest('.mobile-nav-item').classList.toggle('open');">
+                        <a href="{{ url('/popular-products') }}/" class="mobile-nav-link-top">Popular Products</a>
+                        <button type="button" class="mobile-dropdown-toggle" aria-label="Toggle Popular product dropdown" onclick="this.closest('.mobile-nav-item').classList.toggle('open');">
                             <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="6 9 12 15 18 9"></polyline>
                             </svg>

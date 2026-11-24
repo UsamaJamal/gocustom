@@ -217,39 +217,43 @@
             </div>
 
             <div class="form-group" style="position:relative; z-index:100;">
-                <label class="form-label">Policy Pages (from Dynamic Pages)</label>
-                @php $selectedPolicyPages = array_map('intval', (array) ($settings['footer_policy_pages'] ?? [])); @endphp
-                <div class="custom-multiselect-container" id="policyPageMultiselect">
-                    <div class="multiselect-trigger" onclick="toggleDropdown('policyPageMultiselect')">
-                        <div class="selected-tags" data-placeholder="Click to select policy pages..."></div>
+                <label class="form-label">Footer Products <span style="font-size:0.8rem; color:#d9534f; font-weight:normal;">(Max 5 items)</span></label>
+                @php $selectedProducts = array_slice(array_map('intval', (array) ($settings['footer_products'] ?? [])), 0, 5); @endphp
+                <div class="custom-multiselect-container" id="productMultiselect">
+                    <div class="multiselect-trigger" onclick="toggleDropdown('productMultiselect')">
+                        <div class="selected-tags" id="productSelectedTags" data-placeholder="Click to select products (Max 5)..."></div>
                         <i class="fa-solid fa-chevron-down" style="font-size:0.75rem; color:#888;"></i>
                     </div>
                     <div class="multiselect-dropdown">
                         <div class="dropdown-search">
                             <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                            <input type="text" placeholder="Search dynamic pages..." onkeyup="filterOptions(this, 'policyPageOptionsList')">
+                            <input type="text" placeholder="Search products..." onkeyup="filterOptions(this, 'productOptionsList')">
                         </div>
-                        <div class="dropdown-options-list" id="policyPageOptionsList">
-                            @forelse($pages as $page)
+                        <div class="dropdown-actions">
+                            <span style="color:#d9534f; font-weight:600; font-size:0.75rem;">Limit: Max 5 items</span>
+                            <span onclick="clearAllOptions('productMultiselect')" style="cursor:pointer; color:#d9534f; font-size:0.75rem;">Clear All</span>
+                        </div>
+                        <div class="dropdown-options-list" id="productOptionsList">
+                            @forelse($products as $product)
                                 <label class="dropdown-option-item">
-                                    <input type="checkbox" name="footer_policy_pages[]" value="{{ $page['id'] }}" data-title="{{ $page['title'] }}" {{ in_array((int) $page['id'], $selectedPolicyPages) ? 'checked' : '' }} onchange="updateMultiselectDisplay('policyPageMultiselect')">
-                                    <span>{{ $page['title'] }}</span>
+                                    <input type="checkbox" name="footer_products[]" value="{{ $product['id'] }}" data-title="{{ $product['title'] }}" {{ in_array((int) $product['id'], $selectedProducts) ? 'checked' : '' }} onchange="handleLimitCheckbox(this, 'productMultiselect', 5)">
+                                    <span>{{ $product['title'] }}</span>
                                 </label>
                             @empty
-                                <p style="color:#888; padding:0.5rem; font-size:0.75rem;">Create and publish a Dynamic Page first.</p>
+                                <p style="color:#888; padding:0.5rem; font-size:0.75rem;">No products available. Add and publish products first.</p>
                             @endforelse
                         </div>
                     </div>
                 </div>
-                <small style="margin-top:0.375rem; display:block; color:#777;">Exactly the selected page titles and links will appear in the footer Policy column.</small>
+                <small style="margin-top:0.375rem; display:block; color:#777;">Selected products will appear in the footer Products column (maximum 5 items).</small>
             </div>
             
             <div class="form-group">
-                <label class="form-label">Footer Categories (Multiple)</label>
-                @php $selectedCats = (array) ($settings['footer_categories'] ?? []); @endphp
+                <label class="form-label">Footer Categories <span style="font-size:0.8rem; color:#d9534f; font-weight:normal;">(Max 5 items)</span></label>
+                @php $selectedCats = array_slice((array) ($settings['footer_categories'] ?? []), 0, 5); @endphp
                 <div class="custom-multiselect-container" id="categoryMultiselect">
                     <div class="multiselect-trigger" onclick="toggleDropdown('categoryMultiselect')">
-                        <div class="selected-tags" id="categorySelectedTags"></div>
+                        <div class="selected-tags" id="categorySelectedTags" data-placeholder="Click to select categories (Max 5)..."></div>
                         <i class="fa-solid fa-chevron-down" style="font-size: 0.75rem; color: #888;"></i>
                     </div>
 
@@ -259,13 +263,13 @@
                             <input type="text" placeholder="Search categories..." onkeyup="filterOptions(this, 'categoryOptionsList')">
                         </div>
                         <div class="dropdown-actions">
-                            <span onclick="selectAllOptions('categoryMultiselect', true)">Select All</span>
-                            <span onclick="selectAllOptions('categoryMultiselect', false)">Clear All</span>
+                            <span style="color:#d9534f; font-weight:600; font-size:0.75rem;">Limit: Max 5 items</span>
+                            <span onclick="clearAllOptions('categoryMultiselect')" style="cursor:pointer; color:#d9534f; font-size:0.75rem;">Clear All</span>
                         </div>
                         <div class="dropdown-options-list" id="categoryOptionsList">
                             @forelse($categories as $category)
                                 <label class="dropdown-option-item">
-                                    <input type="checkbox" name="footer_categories[]" value="{{ $category['id'] }}" data-title="{{ $category['title'] ?? $category['name'] ?? '' }}" {{ in_array($category['id'], $selectedCats) ? 'checked' : '' }} onchange="updateMultiselectDisplay('categoryMultiselect')">
+                                    <input type="checkbox" name="footer_categories[]" value="{{ $category['id'] }}" data-title="{{ $category['title'] ?? $category['name'] ?? '' }}" {{ in_array($category['id'], $selectedCats) ? 'checked' : '' }} onchange="handleLimitCheckbox(this, 'categoryMultiselect', 5)">
                                     <span>{{ $category['title'] ?? $category['name'] ?? '' }}</span>
                                 </label>
                             @empty
@@ -274,12 +278,13 @@
                         </div>
                     </div>
                 </div>
+                <small style="margin-top:0.375rem; display:block; color:#777;">Selected categories will appear in the footer Categories column (maximum 5 items).</small>
             </div>
             
             <div class="form-group">
-                <label class="form-label">Footer Quick Links</label>
+                <label class="form-label">Footer Quick Links <span style="font-size:0.8rem; color:#d9534f; font-weight:normal;">(Max 5 items)</span></label>
                 <div id="quick-links-container">
-                    @php $quickLinks = $settings['footer_quick_links'] ?? []; @endphp
+                    @php $quickLinks = array_slice($settings['footer_quick_links'] ?? [], 0, 5); @endphp
                     
                     @if(empty($quickLinks))
                         <div class="quick-link-row" style="display:flex; gap:0.625rem; margin-bottom:0.625rem;">
@@ -315,8 +320,29 @@
         const container = document.getElementById('quick-links-container');
         const addBtn = document.getElementById('add-quick-link-btn');
         
+        function updateQuickLinkLimit() {
+            if (!container || !addBtn) return;
+            const count = container.querySelectorAll('.quick-link-row').length;
+            if (count >= 5) {
+                addBtn.disabled = true;
+                addBtn.style.opacity = '0.5';
+                addBtn.style.cursor = 'not-allowed';
+                addBtn.innerText = '+ Add Quick Link (Max 5 Reached)';
+            } else {
+                addBtn.disabled = false;
+                addBtn.style.opacity = '1';
+                addBtn.style.cursor = 'pointer';
+                addBtn.innerText = '+ Add Quick Link';
+            }
+        }
+
         if(addBtn) {
             addBtn.addEventListener('click', function() {
+                const currentRows = container.querySelectorAll('.quick-link-row').length;
+                if (currentRows >= 5) {
+                    alert('You can add a maximum of 5 Quick Links.');
+                    return;
+                }
                 const row = document.createElement('div');
                 row.className = 'quick-link-row';
                 row.style = 'display:flex; gap:0.625rem; margin-bottom:0.625rem;';
@@ -326,24 +352,28 @@
                     <button type="button" class="btn btn-danger remove-link-btn" style="padding:0 0.9375rem;">&times;</button>
                 `;
                 container.appendChild(row);
+                updateQuickLinkLimit();
             });
             
             container.addEventListener('click', function(e) {
                 if (e.target.classList.contains('remove-link-btn')) {
                     const row = e.target.closest('.quick-link-row');
-                    if (container.children.length > 1) {
+                    if (container.querySelectorAll('.quick-link-row').length > 1) {
                         row.remove();
                     } else {
                         // Just clear the inputs if it's the last row
                         row.querySelectorAll('input').forEach(input => input.value = '');
                     }
+                    updateQuickLinkLimit();
                 }
             });
+
+            updateQuickLinkLimit();
         }
 
         // Initialize multiselect
         updateMultiselectDisplay('categoryMultiselect');
-        updateMultiselectDisplay('policyPageMultiselect');
+        updateMultiselectDisplay('productMultiselect');
     });
 
     function toggleDropdown(containerId) {
@@ -357,16 +387,36 @@
         }
     });
 
+    function handleLimitCheckbox(checkbox, containerId, maxLimit = 5) {
+        const container = document.getElementById(containerId);
+        const checkedBoxes = container.querySelectorAll('.dropdown-options-list input[type="checkbox"]:checked');
+        if (checkedBoxes.length > maxLimit) {
+            checkbox.checked = false;
+            alert('You can select a maximum of ' + maxLimit + ' items only.');
+        }
+        updateMultiselectDisplay(containerId);
+    }
+
     function updateMultiselectDisplay(containerId) {
         const container = document.getElementById(containerId);
         const tagsBox = container.querySelector('.selected-tags');
         const checkedInputs = container.querySelectorAll('.dropdown-options-list input[type="checkbox"]:checked');
         
+        // Enforce max 5 limit if existing data had more
+        if (checkedInputs.length > 5) {
+            checkedInputs.forEach((cb, idx) => {
+                if (idx >= 5) {
+                    cb.checked = false;
+                }
+            });
+        }
+
+        const activeInputs = container.querySelectorAll('.dropdown-options-list input[type="checkbox"]:checked');
         tagsBox.innerHTML = '';
-        if (checkedInputs.length === 0) {
-            tagsBox.innerHTML = '<span class="dropdown-placeholder">' + (tagsBox.dataset.placeholder || 'Click to select categories...') + '</span>';
+        if (activeInputs.length === 0) {
+            tagsBox.innerHTML = '<span class="dropdown-placeholder">' + (tagsBox.dataset.placeholder || 'Click to select...') + '</span>';
         } else {
-            checkedInputs.forEach(cb => {
+            activeInputs.forEach(cb => {
                 const title = cb.getAttribute('data-title');
                 const val = cb.value;
                 const chip = document.createElement('span');
@@ -396,13 +446,11 @@
         });
     }
 
-    function selectAllOptions(containerId, selectAll) {
+    function clearAllOptions(containerId) {
         const container = document.getElementById(containerId);
         const cbs = container.querySelectorAll('.dropdown-options-list input[type="checkbox"]');
         cbs.forEach(cb => {
-            if (cb.closest('.dropdown-option-item').style.display !== 'none') {
-                cb.checked = selectAll;
-            }
+            cb.checked = false;
         });
         updateMultiselectDisplay(containerId);
     }

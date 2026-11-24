@@ -58,10 +58,19 @@ class AppServiceProvider extends ServiceProvider
                     'company_phone' => '1800-315-8441',
                     'company_address' => '4000 N Montrose Ave<br>550 Chicago, IL 60641',
                     'footer_categories' => [],
+                    'footer_products' => [],
                     'footer_quick_links' => [],
                     'footer_policy_pages' => [],
                     'footer_description' => 'Go Custom Boxes is a leading custom packaging manufacturer, delivering premium boxes and packaging solutions tailored to your brand. From design to delivery, we ensure unmatched quality, style, and customer service.'
                 ];
+
+                $settingsFile = storage_path('app/site-settings.json');
+                if (file_exists($settingsFile)) {
+                    $json = json_decode(file_get_contents($settingsFile), true);
+                    if (is_array($json)) {
+                        $defaults = array_merge($defaults, $json);
+                    }
+                }
                 
                 $rows = DB::table('homepage_contents')
                     ->whereIn('section', ['footer', 'company_info', 'social_links'])
@@ -88,6 +97,7 @@ class AppServiceProvider extends ServiceProvider
                     'company_phone' => '1800-315-8441',
                     'company_address' => '4000 N Montrose Ave<br>550 Chicago, IL 60641',
                     'footer_categories' => [],
+                    'footer_products' => [],
                     'footer_quick_links' => [],
                     'footer_policy_pages' => [],
                     'footer_description' => 'Go Custom Boxes is a leading custom packaging manufacturer, delivering premium boxes and packaging solutions tailored to your brand. From design to delivery, we ensure unmatched quality, style, and customer service.'

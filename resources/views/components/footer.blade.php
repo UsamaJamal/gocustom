@@ -2,34 +2,41 @@
     <!-- Top Cards Section -->
     <div class="top-cards-section">
         <div class="container">
+            @php
+                $cardEmail = !empty($siteSettings['company_email']) ? $siteSettings['company_email'] : 'support@gocustomboxes.com';
+                $cardPhone = !empty($siteSettings['company_phone']) && $siteSettings['company_phone'] !== '0123456789' && $siteSettings['company_phone'] !== '1800-315-8441' ? $siteSettings['company_phone'] : '847-200-0971';
+                $cardAddress = !empty($siteSettings['company_address']) && !str_contains($siteSettings['company_address'], 'Montrose') ? $siteSettings['company_address'] : '1941 Waverly way Montgomery IL 60538';
+                $cleanPhone = preg_replace('/[^0-9+]/', '', $cardPhone);
+                $mapQuery = urlencode(strip_tags(str_replace(['<br>', '<br/>', '<br />'], ' ', $cardAddress)));
+            @endphp
             <div class="top-cards-grid">
-                <div class="top-card">
+                <a href="mailto:{{ $cardEmail }}" class="top-card" style="text-decoration: none; cursor: pointer; color: inherit;">
                     <div class="top-card-icon">
                         <img src="{{ asset('images/contact-email.webp') }}" alt="Email" width="25" height="20">
                     </div>
                     <div class="top-card-title">Get In Touch</div>
                     <div class="top-card-text">
-                        support@gocustomboxes.com
+                        {{ $cardEmail }}
                     </div>
-                </div>
-                <div class="top-card">
+                </a>
+                <a href="tel:{{ $cleanPhone }}" class="top-card" style="text-decoration: none; cursor: pointer; color: inherit;">
                     <div class="top-card-icon">
                         <img src="{{ asset('images/material-symbols_call-sharp.webp') }}" alt="Phone" width="30" height="30">
                     </div>
                     <div class="top-card-title">Call Us</div>
                     <div class="top-card-text">
-                        847-200-0971
+                        {{ $cardPhone }}
                     </div>
-                </div>
-                <div class="top-card">
+                </a>
+                <a href="https://www.google.com/maps/place/Go+Custom+Boxes/@41.7238237,-88.40347,19.63z/data=!4m15!1m8!3m7!1s0x880ee8cc8e1048af:0x22c732baaebb1bb2!2s1941+Waverly+Way,+Montgomery,+IL+60538,+USA!3b1!8m2!3d41.7238163!4d-88.4034576!16s%2Fg%2F11snnlvyv7!3m5!1s0x880ee9cb9d7bb8a7:0xc217e8b02a3b96f8!8m2!3d41.723822!4d-88.403468!16s%2Fg%2F11hyl38x8n?entry=ttu&g_ep=EgoyMDI2MTExOC4xIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" class="top-card" style="text-decoration: none; cursor: pointer; color: inherit;">
                     <div class="top-card-icon">
                         <img src="{{ asset('images/contact-address.webp') }}" alt="Address" width="19" height="27">
                     </div>
                     <div class="top-card-title">Address</div>
                     <div class="top-card-text">
-                        1941 Waverly way Montgomery IL 60538
+                        {!! $cardAddress !!}
                     </div>
-                </div>
+                </a>
             </div>
         </div>
     </div>
@@ -55,13 +62,17 @@
                     </span>
                     <ul class="footer-links accordion-content">
                         @php
-                            $footerCatIds = $siteSettings['footer_categories'] ?? [];
+                            $footerCatIds = array_slice($siteSettings['footer_categories'] ?? [], 0, 5);
                             $footerCats = [];
                             if (!empty($footerCatIds)) {
-                                $footerCats = \Illuminate\Support\Facades\DB::table('admin_categories')
-                                    ->whereIn('id', $footerCatIds)
-                                    ->where('status', 'published')
-                                    ->get();
+                                try {
+                                    $footerCats = \Illuminate\Support\Facades\DB::table('admin_categories')
+                                        ->whereIn('id', $footerCatIds)
+                                        ->where('status', 'published')
+                                        ->get();
+                                } catch (\Exception $e) {
+                                    $footerCats = collect();
+                                }
                             }
                         @endphp
                         @if(empty($footerCatIds) || count($footerCats) == 0)
@@ -71,8 +82,36 @@
                             <li><a href="/jewelry-boxes">Jewelry Boxes</a></li>
                             <li><a href="/hang-tags">Hang Tags</a></li>
                         @else
-                            @foreach($footerCats as $cat)
+                            @foreach($footerCats->take(5) as $cat)
                                 <li><a href="{{ url('/' . $cat->slug) }}/">{{ $cat->title ?? $cat->name }}</a></li>
+                            @endforeach
+                        @endif
+                    </ul>
+                </div>
+
+                <!-- Products Column -->
+                <div class="footer-column mobile-accordion">
+                    <span class="footer-heading" onclick="this.parentElement.classList.toggle('open')" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+                        Products <span class="toggle-icon">+</span>
+                    </span>
+                    <ul class="footer-links accordion-content">
+                        @php
+                            $footerProductIds = array_slice($siteSettings['footer_products'] ?? [], 0, 5);
+                            $footerProducts = [];
+                            if (!empty($footerProductIds)) {
+                                try {
+                                    $footerProducts = \Illuminate\Support\Facades\DB::table('admin_products')
+                                        ->whereIn('id', $footerProductIds)
+                                        ->where('status', 'published')
+                                        ->get();
+                                } catch (\Exception $e) {
+                                    $footerProducts = collect();
+                                }
+                            }
+                        @endphp
+                        @if(!empty($footerProducts) && count($footerProducts) > 0)
+                            @foreach($footerProducts->take(5) as $prod)
+                                <li><a href="{{ url('/' . ltrim($prod->slug, '/')) }}/">{{ $prod->title }}</a></li>
                             @endforeach
                         @endif
                     </ul>
@@ -85,42 +124,22 @@
                     </span>
                     <ul class="footer-links accordion-content">
                         @php
-                            $quickLinks = $siteSettings['footer_quick_links'] ?? [];
+                            $quickLinks = array_slice($siteSettings['footer_quick_links'] ?? [], 0, 5);
                         @endphp
                         @if(empty($quickLinks))
                             <li><a href="/about-us/">About Us</a></li>
                             <li><a href="/contact-us/">Contact Us</a></li>
                             <li><a href="/request-quote/">Get A Free Quote</a></li>
-                            <li><a href="/contact-us/">Refund & Exchange Policy</a></li>
+                            <li><a href="/terms-of-services/">Terms of Services</a></li>
                             <li><a href="/blog/">Blog</a></li>
                         @else
-                            @foreach($quickLinks as $link)
+                            @foreach(array_slice($quickLinks, 0, 5) as $link)
                                 <li><a href="{{ $link['url'] }}">{{ $link['name'] }}</a></li>
                             @endforeach
                         @endif
                     </ul>
-                </div>
-
-                <!-- Policy Column -->
-                <div class="footer-column mobile-accordion">
-                    <span class="footer-heading" onclick="this.parentElement.classList.toggle('open')" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
-                        Policy <span class="toggle-icon">+</span>
-                    </span>
-                    <ul class="footer-links accordion-content">
-                        @php
-                            $policyPageIds = array_values(array_filter(array_map('intval', (array) ($siteSettings['footer_policy_pages'] ?? []))));
-                            $policyPagesById = $policyPageIds
-                                ? \Illuminate\Support\Facades\DB::table('admin_pages')->where('status', 'published')->whereIn('id', $policyPageIds)->get()->keyBy('id')
-                                : collect();
-                            $policyPages = collect($policyPageIds)->map(fn ($id) => $policyPagesById->get($id))->filter();
-                        @endphp
-                        @forelse($policyPages as $policyPage)
-                            <li><a href="{{ url('/' . ltrim($policyPage->slug, '/')) }}/">{{ $policyPage->title }}</a></li>
-                        @empty
-                        @endforelse
-                    </ul>
                     
-                    <div class="desktop-social-section" style="margin-top: 3.9375rem;">
+                    <div class="desktop-social-section" style="margin-top: 2rem;">
                         <span class="footer-heading" style="display: block; margin-bottom: 1.25rem;">Follow Us</span>
                         <div class="social-links desktop-social-links" style="display: flex; justify-content: flex-start; gap: 0.9375rem;">
                             <a href="{{ $siteSettings['social_facebook'] ?? '#' }}" target="_blank" rel="noopener" class="social-icon" aria-label="Facebook">

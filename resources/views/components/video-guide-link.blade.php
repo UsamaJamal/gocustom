@@ -78,6 +78,7 @@
             box-sizing: border-box;
         }
         .qf-video-title {
+            display: block;
             margin: 0 2.5rem 0.75rem 0;
             color: #FFFFFF;
             font-family: 'Open Sans', sans-serif;
@@ -111,7 +112,7 @@
     <div class="qf-video-modal" id="qf-video-modal" role="dialog" aria-modal="true" aria-labelledby="qf-video-title" hidden>
         <div class="qf-video-dialog">
             <button type="button" class="qf-video-close" aria-label="Close video">&times;</button>
-            <h3 class="qf-video-title" id="qf-video-title">Video Guide</h3>
+            <span class="qf-video-title" id="qf-video-title">Video Guide</span>
             <video controls controlslist="nodownload noplaybackrate" disablepictureinpicture disableremoteplayback playsinline preload="none" oncontextmenu="return false;"></video>
         </div>
     </div>

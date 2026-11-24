@@ -13,9 +13,11 @@
     RewriteRule ^(?:public/)?delivery-information(?:\.php)?$ - [G,L]
     RewriteRule ^(?:public/)?prize(?:/.*)?$ - [G,L]
 
-    # Redirect www to non-www (https://gocustomboxes.com)
-    RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
-    RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L,NE]
+    # 1-Hop Canonical Redirect: Force HTTPS and Non-WWW simultaneously
+    RewriteCond %{HTTPS} off [OR]
+    RewriteCond %{HTTP:X-Forwarded-Proto} =http [OR]
+    RewriteCond %{HTTP_HOST} ^www\. [NC]
+    RewriteRule ^ https://gocustomboxes.com%{REQUEST_URI} [R=301,L,NE]
 
     # Redirect directly requested /index.php (and /public/index.php) URLs to the clean URL,
     # e.g. /index.php -> /, /index.php/kraft-boxes/ -> /kraft-boxes/.

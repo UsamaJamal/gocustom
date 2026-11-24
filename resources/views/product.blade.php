@@ -1370,10 +1370,13 @@
             padding: 0 var(--margin-sides);
         }
         
-        .related-products h2 {
+        .related-products h2,
+        .related-products .related-products-title {
+            display: block;
             text-align: center;
             font-size: 2rem;
             margin-bottom: 2.5rem;
+            font-weight: 700;
         }
         
         .products-grid {
@@ -1409,7 +1412,10 @@
             overflow: hidden;
         }
         
-        .product-card h4 {
+        .product-card h4,
+        .product-card span,
+        .product-card .product-title {
+            display: block;
             font-size: 1.125rem;
             font-weight: 700;
             color: #000;
@@ -2677,7 +2683,7 @@
     @if(count($rProds))
     <section class="related-products">
         <div class="container">
-            <h2>Related Products</h2>
+            <span class="related-products-title">Related Products</span>
             <div class="products-grid">
                 @foreach($rProds as $rp)
                     @php
@@ -2709,7 +2715,7 @@
                             <div class="product-image">
                                 <img src="{{ asset($rpImg) }}" alt="{{ $rpImgCleanName }}" title="{{ $rpImgCleanName }}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://placehold.co/284x284/eeeeee/555555?text={{ urlencode($rpImgCleanName) }}'">
                             </div>
-                            <h4>{{ $rp['title'] }}</h4>
+                            <span class="product-title">{{ $rp['title'] }}</span>
                         </a>
                     </div>
                 @endforeach

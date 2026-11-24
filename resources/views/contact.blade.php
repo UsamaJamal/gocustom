@@ -637,10 +637,10 @@
             <div class="container map-faq-container">
                 <!-- Map Column -->
                 <div class="map-column">
-                    <a href="https://www.google.com/maps/place/LabelPouches/@41.99806,-87.684407,13z/data=!4m6!3m5!1s0x880fd1f71b5875cf:0xee620728700effbf!8m2!3d41.9980605!4d-87.6844075!16s%2Fg%2F11xgy7x13f?entry=ttu&g_ep=EgoyMDI2MDgwNS4xIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" class="open-maps-btn">
+                    <a href="https://www.google.com/maps/place/Go+Custom+Boxes/@41.7238237,-88.40347,19.63z/data=!4m15!1m8!3m7!1s0x880ee8cc8e1048af:0x22c732baaebb1bb2!2s1941+Waverly+Way,+Montgomery,+IL+60538,+USA!3b1!8m2!3d41.7238163!4d-88.4034576!16s%2Fg%2F11snnlvyv7!3m5!1s0x880ee9cb9d7bb8a7:0xc217e8b02a3b96f8!8m2!3d41.723822!4d-88.403468!16s%2Fg%2F11hyl38x8n?entry=ttu&g_ep=EgoyMDI2MTExOC4xIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" class="open-maps-btn">
                         Open in Maps <i class="fa-solid fa-arrow-up-right-from-square"></i>
                     </a>
-                    <iframe id="contact-map" src="https://maps.google.com/maps?q=41.9980605,-87.6844075&t=&z=13&ie=UTF8&iwloc=&output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" title="LabelPouches Map"></iframe>
+                    <iframe id="contact-map" src="https://maps.google.com/maps?q=41.723822,-88.403468&t=&z=16&ie=UTF8&iwloc=&output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" title="Go Custom Boxes Map"></iframe>
                 </div>
 
                 @if(count($contactFaqs) > 0)
