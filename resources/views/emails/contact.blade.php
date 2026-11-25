@@ -23,10 +23,13 @@
                         <th align="left" style="width:30%; padding:0.75rem; background:#3498DB; color:#ffffff; border:1px solid #d7e0ea; font-size:0.875rem;">Client Phone:</th>
                         <td style="padding:0.75rem; border:1px solid #d7e0ea; color:#333333; font-size:0.875rem;">{{ $data['phone'] ?? 'N/A' }}</td>
                     </tr>
+                    {{-- Subject is optional on the contact form; leave the row out when it's empty. --}}
+                    @if(filled($data['subject'] ?? null))
                     <tr>
                         <th align="left" style="width:30%; padding:0.75rem; background:#3498DB; color:#ffffff; border:1px solid #d7e0ea; font-size:0.875rem;">Subject:</th>
-                        <td style="padding:0.75rem; border:1px solid #d7e0ea; color:#333333; font-size:0.875rem;">{{ $data['subject'] ?? 'N/A' }}</td>
+                        <td style="padding:0.75rem; border:1px solid #d7e0ea; color:#333333; font-size:0.875rem;">{{ $data['subject'] }}</td>
                     </tr>
+                    @endif
                     <tr>
                         <th align="left" style="width:30%; padding:0.75rem; background:#3498DB; color:#ffffff; border:1px solid #d7e0ea; font-size:0.875rem; vertical-align:top;">Message:</th>
                         <td style="padding:0.75rem; border:1px solid #d7e0ea; color:#333333; font-size:0.875rem; line-height:1.5; white-space:pre-line;">{{ $data['message'] ?? 'N/A' }}</td>
