@@ -331,6 +331,9 @@
             branding: false,
             promotion: false,
             content_style: 'body { font-family: sans-serif; font-size: 14px; line-height: 1.5; }',
+            // Keep <style> blocks, as the main editors do.
+            valid_children: window.tinyMceUploadConfig.valid_children,
+            extended_valid_elements: window.tinyMceUploadConfig.extended_valid_elements,
             setup: function (editor) {
                 editor.on('change keyup blur', function () {
                     editor.save();

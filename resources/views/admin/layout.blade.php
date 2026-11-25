@@ -99,6 +99,9 @@
     </style>
     <script>
         window.tinyMceUploadConfig = {
+            // TinyMCE drops <style> blocks by default, so CSS pasted into the source view was lost on every save.
+            valid_children: '+body[style],+div[style],+section[style]',
+            extended_valid_elements: 'style[type|media]',
             relative_urls: false,
             remove_script_host: false,
             convert_urls: false,
