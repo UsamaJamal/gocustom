@@ -15,8 +15,8 @@ class AdminFooterController extends Controller
     public function getSettings(): array
     {
         $defaults = [
-            'company_email' => 'example@gmail.com',
-            'company_phone' => '1800-315-8441',
+            'company_email' => 'support@gocustomboxes.com',
+            'company_phone' => '1-773-945-5230',
             'company_address' => '4000 N Montrose Ave<br>550 Chicago, IL 60641',
             'footer_categories' => [],
             'footer_products' => [],

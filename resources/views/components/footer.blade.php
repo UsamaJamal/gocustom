@@ -4,7 +4,7 @@
         <div class="container">
             @php
                 $cardEmail = !empty($siteSettings['company_email']) ? $siteSettings['company_email'] : 'support@gocustomboxes.com';
-                $cardPhone = !empty($siteSettings['company_phone']) && $siteSettings['company_phone'] !== '0123456789' && $siteSettings['company_phone'] !== '1800-315-8441' ? $siteSettings['company_phone'] : '847-200-0971';
+                $cardPhone = !empty($siteSettings['company_phone']) && $siteSettings['company_phone'] !== '0123456789' && $siteSettings['company_phone'] !== '1800-315-8441' ? $siteSettings['company_phone'] : '1-773-945-5230';
                 $cardAddress = !empty($siteSettings['company_address']) && !str_contains($siteSettings['company_address'], 'Montrose') ? $siteSettings['company_address'] : '1941 Waverly way Montgomery IL 60538';
                 $cleanPhone = preg_replace('/[^0-9+]/', '', $cardPhone);
                 $mapQuery = urlencode(strip_tags(str_replace(['<br>', '<br/>', '<br />'], ' ', $cardAddress)));

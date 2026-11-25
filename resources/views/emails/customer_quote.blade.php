@@ -150,7 +150,7 @@
                 <p style="margin:0 0 0.5rem;">
                     <strong>Email:</strong> <a href="mailto:{{ $supportEmail ?? 'support@gocustomboxes.com' }}" style="color:#2563eb; text-decoration:none;">{{ $supportEmail ?? 'support@gocustomboxes.com' }}</a>
                     &nbsp;|&nbsp;
-                    <strong>Phone:</strong> <a href="tel:+18003158441" style="color:#2563eb; text-decoration:none;">+1-800-315-8441</a>
+                    <strong>Phone:</strong> <a href="tel:+17739455230" style="color:#2563eb; text-decoration:none;">1-773-945-5230</a>
                 </p>
                 <p style="margin:0; font-size:0.75rem; color:#94a3b8;">
                     Go Custom Boxes &bull; 1941 Waverly way, Montgomery, IL 60538, US

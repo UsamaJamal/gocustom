@@ -599,7 +599,7 @@
                             </div>
                             <div class="info-content">
                                 <h4>Call Us</h4>
-                                <a href="tel:{{ $siteSettings['company_phone'] ?? '847-200-0971' }}">{{ $siteSettings['company_phone'] ?? '847-200-0971' }}</a>
+                                <a href="tel:{{ preg_replace('/[^0-9+]/', '', $siteSettings['company_phone'] ?? '1-773-945-5230') }}">{{ $siteSettings['company_phone'] ?? '1-773-945-5230' }}</a>
                             </div>
                         </div>
 

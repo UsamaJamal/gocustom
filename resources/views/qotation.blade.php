@@ -529,13 +529,13 @@
                             <div style="background-color: #FFB400; color: white; width: 2rem; height: 2rem; border-radius: 0.375rem; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; flex-shrink: 0;">
                                 <i class="fa-solid fa-envelope"></i>
                             </div>
-                            <span style="font-size: 0.9375rem; color: #000; font-family: 'DM Sans', sans-serif; font-weight: 500;">support@gocustomboxes.com</span>
+                            <a href="mailto:{{ $siteSettings['company_email'] ?? 'support@gocustomboxes.com' }}" style="font-size: 0.9375rem; color: #000; font-family: 'DM Sans', sans-serif; font-weight: 500; text-decoration: none;">{{ $siteSettings['company_email'] ?? 'support@gocustomboxes.com' }}</a>
                         </div>
                         <div style="display: flex; gap: 0.75rem; align-items: center;">
                             <div style="background-color: #FFB400; color: white; width: 2rem; height: 2rem; border-radius: 0.375rem; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; flex-shrink: 0;">
                                 <i class="fa-solid fa-phone"></i>
                             </div>
-                            <span style="font-size: 0.9375rem; color: #000; font-family: 'DM Sans', sans-serif; font-weight: 500;">847-200-0971</span>
+                            <a href="tel:{{ preg_replace('/[^0-9+]/', '', $siteSettings['company_phone'] ?? '1-773-945-5230') }}" style="font-size: 0.9375rem; color: #000; font-family: 'DM Sans', sans-serif; font-weight: 500; text-decoration: none;">{{ $siteSettings['company_phone'] ?? '1-773-945-5230' }}</a>
                         </div>
                     </div>
                 </div>

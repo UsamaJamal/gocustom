@@ -8,6 +8,7 @@
     );
     $schemaLogo = asset('uploads/header-logo.svg');
     $schemaSettings = $siteSettings ?? [];
+    $schemaPhone = !empty($schemaSettings['company_phone']) ? (str_starts_with($schemaSettings['company_phone'], '+') ? $schemaSettings['company_phone'] : '+1-' . ltrim($schemaSettings['company_phone'], '1-+')) : '+1-773-945-5230';
 
     $schemaImageUrl = function ($path) {
         if (empty($path)) {
@@ -69,7 +70,7 @@
         'name' => 'Customer Support',
         'contactPoint' => [
             '@type' => 'ContactPoint',
-            'telephone' => '+1-800-315-8441',
+            'telephone' => $schemaPhone,
             'email' => 'support@gocustomboxes.com',
             'contactType' => 'Customer Service',
             'areaServed' => 'US',
@@ -206,7 +207,7 @@
                     'url' => $schemaPageUrl,
                     'logo' => $schemaLogo,
                     'image' => $prodImages[0] ?? asset('uploads/Home-Banner.webp'),
-                    'telephone' => '+1-800-315-8441',
+                    'telephone' => $schemaPhone,
                     'email' => 'support@gocustomboxes.com',
                     'address' => $sharedAddress,
                     'sameAs' => $sameAsSocials,
@@ -315,7 +316,7 @@
                 'url' => $schemaPageUrl,
                 'logo' => $schemaLogo,
                 'image' => $catImage,
-                'telephone' => '+1-847-200-0971',
+                'telephone' => $schemaPhone,
                 'email' => 'support@gocustomboxes.com',
                 'address' => $sharedAddress,
                 'sameAs' => $sameAsSocials,
@@ -389,7 +390,7 @@
                     'description' => 'Custom printed packaging and boxes manufacturer.',
                     'contactPoint' => [
                         '@type' => 'ContactPoint',
-                        'telephone' => '+1-800-315-8441',
+                        'telephone' => $schemaPhone,
                         'email' => 'support@gocustomboxes.com',
                         'contactType' => 'customer service',
                         'availableLanguage' => 'English',
@@ -403,7 +404,7 @@
                     'logo' => $schemaLogo,
                     'image' => asset('uploads/Home-Banner.webp'),
                     'description' => 'Custom printed boxes and premium packaging solutions for businesses.',
-                    'telephone' => '+1-800-315-8441',
+                    'telephone' => $schemaPhone,
                     'email' => 'support@gocustomboxes.com',
                     'priceRange' => '$$',
                     'address' => $sharedAddress,
