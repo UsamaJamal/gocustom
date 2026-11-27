@@ -274,7 +274,7 @@ class AdminContentController extends Controller
 
                     $targetPath = null;
                     if ($file && $file->isValid()) {
-                        $safeName = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
+                        $safeName = basename($file->getClientOriginalName());
                         $file->move($uploadPath, $safeName);
                         $targetPath = 'uploads/' . $safeName;
                     } elseif (!empty($existingPath)) {
@@ -315,7 +315,7 @@ class AdminContentController extends Controller
                     }
                     $newImages = collect($galleryFiles)
                         ->map(function ($file) use ($uploadPath) {
-                            $fileName = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $file->getClientOriginalName());
+                            $fileName = basename($file->getClientOriginalName());
                             $file->move($uploadPath, $fileName);
                             return 'uploads/' . $fileName;
                         })

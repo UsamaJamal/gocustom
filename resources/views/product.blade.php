@@ -261,27 +261,11 @@
             overflow: hidden;
             position: relative;
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
-            opacity: 0.85;
-        }
-
-        .thumb::after {
-            
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 2.1875rem;
-            height: 1rem;
-            background-color: #F2F4F5;
-            border-bottom-left-radius: 0.25rem;
+            opacity: 1;
         }
         
         .thumb.active {
             border: 2px solid var(--primary-color, #0B2545);
-            opacity: 1;
-        }
-
-        .thumb:hover {
-            opacity: 1;
         }
         
         .trust-badges-container {

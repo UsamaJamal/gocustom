@@ -54,13 +54,22 @@
     }
 
     .text-content-heading,
-    .text-content-body h2 {
+    .text-content-body h1,
+    .text-content-body h2,
+    .text-content-body h3,
+    .text-content-body h4,
+    .text-content-body h5,
+    .text-content-body h6 {
         font-family: 'Open Sans', sans-serif;
-        font-size: 1.5rem;
         font-weight: 700;
         color: #000000;
-        margin-bottom: 1.25rem;
         line-height: 1.4;
+    }
+
+    .text-content-heading,
+    .text-content-body h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1.25rem;
     }
 
     .text-content-body p {
@@ -92,14 +101,14 @@
     .text-content-body li {
         font-family: 'Open Sans', sans-serif;
         font-size: 1rem;
-        color: #333;
+        color: #000000;
         line-height: 1.7;
         padding-left: 0.25rem;
         margin-bottom: 0.25rem;
     }
 
     .text-content-body li::marker {
-        color: #333;
+        color: #000000;
         font-weight: 600;
     }
 

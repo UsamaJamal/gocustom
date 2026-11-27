@@ -62,7 +62,7 @@
                     </span>
                     <ul class="footer-links accordion-content">
                         @php
-                            $footerCatIds = array_slice($siteSettings['footer_categories'] ?? [], 0, 5);
+                            $footerCatIds = (array) ($siteSettings['footer_categories'] ?? []);
                             $footerCats = [];
                             if (!empty($footerCatIds)) {
                                 try {
@@ -82,7 +82,7 @@
                             <li><a href="/jewelry-boxes">Jewelry Boxes</a></li>
                             <li><a href="/hang-tags">Hang Tags</a></li>
                         @else
-                            @foreach($footerCats->take(5) as $cat)
+                            @foreach($footerCats as $cat)
                                 <li><a href="{{ url('/' . $cat->slug) }}/">{{ $cat->title ?? $cat->name }}</a></li>
                             @endforeach
                         @endif
@@ -96,7 +96,7 @@
                     </span>
                     <ul class="footer-links accordion-content">
                         @php
-                            $footerProductIds = array_slice($siteSettings['footer_products'] ?? [], 0, 5);
+                            $footerProductIds = (array) ($siteSettings['footer_products'] ?? []);
                             $footerProducts = [];
                             if (!empty($footerProductIds)) {
                                 try {
@@ -110,7 +110,7 @@
                             }
                         @endphp
                         @if(!empty($footerProducts) && count($footerProducts) > 0)
-                            @foreach($footerProducts->take(5) as $prod)
+                            @foreach($footerProducts as $prod)
                                 <li><a href="{{ url('/' . ltrim($prod->slug, '/')) }}/">{{ $prod->title }}</a></li>
                             @endforeach
                         @endif
@@ -124,7 +124,7 @@
                     </span>
                     <ul class="footer-links accordion-content">
                         @php
-                            $quickLinks = array_slice($siteSettings['footer_quick_links'] ?? [], 0, 5);
+                            $quickLinks = (array) ($siteSettings['footer_quick_links'] ?? []);
                         @endphp
                         @if(empty($quickLinks))
                             <li><a href="/about-us/">About Us</a></li>
@@ -133,7 +133,7 @@
                             <li><a href="/terms-of-services/">Terms of Services</a></li>
                             <li><a href="/blog/">Blog</a></li>
                         @else
-                            @foreach(array_slice($quickLinks, 0, 5) as $link)
+                            @foreach($quickLinks as $link)
                                 <li><a href="{{ $link['url'] }}">{{ $link['name'] }}</a></li>
                             @endforeach
                         @endif

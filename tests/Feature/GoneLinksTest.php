@@ -14,7 +14,6 @@ class GoneLinksTest extends TestCase
         $links = [
             '/delivery-information.php?prize/2582478',
             '/delivery-information.php',
-            '/delivery-information',
             '/prize/16834912',
             '/prize/7676867',
             '/prize/8665112',

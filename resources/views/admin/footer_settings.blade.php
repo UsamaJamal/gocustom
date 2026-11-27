@@ -217,11 +217,11 @@
             </div>
 
             <div class="form-group" style="position:relative; z-index:100;">
-                <label class="form-label">Footer Products <span style="font-size:0.8rem; color:#d9534f; font-weight:normal;">(Max 5 items)</span></label>
-                @php $selectedProducts = array_slice(array_map('intval', (array) ($settings['footer_products'] ?? [])), 0, 5); @endphp
+                <label class="form-label">Footer Products</label>
+                @php $selectedProducts = array_map('intval', (array) ($settings['footer_products'] ?? [])); @endphp
                 <div class="custom-multiselect-container" id="productMultiselect">
                     <div class="multiselect-trigger" onclick="toggleDropdown('productMultiselect')">
-                        <div class="selected-tags" id="productSelectedTags" data-placeholder="Click to select products (Max 5)..."></div>
+                        <div class="selected-tags" id="productSelectedTags" data-placeholder="Click to select products..."></div>
                         <i class="fa-solid fa-chevron-down" style="font-size:0.75rem; color:#888;"></i>
                     </div>
                     <div class="multiselect-dropdown">
@@ -230,13 +230,13 @@
                             <input type="text" placeholder="Search products..." onkeyup="filterOptions(this, 'productOptionsList')">
                         </div>
                         <div class="dropdown-actions">
-                            <span style="color:#d9534f; font-weight:600; font-size:0.75rem;">Limit: Max 5 items</span>
+                            <span style="color:#666; font-size:0.75rem;">Select products</span>
                             <span onclick="clearAllOptions('productMultiselect')" style="cursor:pointer; color:#d9534f; font-size:0.75rem;">Clear All</span>
                         </div>
                         <div class="dropdown-options-list" id="productOptionsList">
                             @forelse($products as $product)
                                 <label class="dropdown-option-item">
-                                    <input type="checkbox" name="footer_products[]" value="{{ $product['id'] }}" data-title="{{ $product['title'] }}" {{ in_array((int) $product['id'], $selectedProducts) ? 'checked' : '' }} onchange="handleLimitCheckbox(this, 'productMultiselect', 5)">
+                                    <input type="checkbox" name="footer_products[]" value="{{ $product['id'] }}" data-title="{{ $product['title'] }}" {{ in_array((int) $product['id'], $selectedProducts) ? 'checked' : '' }} onchange="updateMultiselectDisplay('productMultiselect')">
                                     <span>{{ $product['title'] }}</span>
                                 </label>
                             @empty
@@ -245,15 +245,15 @@
                         </div>
                     </div>
                 </div>
-                <small style="margin-top:0.375rem; display:block; color:#777;">Selected products will appear in the footer Products column (maximum 5 items).</small>
+                <small style="margin-top:0.375rem; display:block; color:#777;">Selected products will appear in the footer Products column.</small>
             </div>
             
             <div class="form-group">
-                <label class="form-label">Footer Categories <span style="font-size:0.8rem; color:#d9534f; font-weight:normal;">(Max 5 items)</span></label>
-                @php $selectedCats = array_slice((array) ($settings['footer_categories'] ?? []), 0, 5); @endphp
+                <label class="form-label">Footer Categories</label>
+                @php $selectedCats = (array) ($settings['footer_categories'] ?? []); @endphp
                 <div class="custom-multiselect-container" id="categoryMultiselect">
                     <div class="multiselect-trigger" onclick="toggleDropdown('categoryMultiselect')">
-                        <div class="selected-tags" id="categorySelectedTags" data-placeholder="Click to select categories (Max 5)..."></div>
+                        <div class="selected-tags" id="categorySelectedTags" data-placeholder="Click to select categories..."></div>
                         <i class="fa-solid fa-chevron-down" style="font-size: 0.75rem; color: #888;"></i>
                     </div>
 
@@ -263,13 +263,13 @@
                             <input type="text" placeholder="Search categories..." onkeyup="filterOptions(this, 'categoryOptionsList')">
                         </div>
                         <div class="dropdown-actions">
-                            <span style="color:#d9534f; font-weight:600; font-size:0.75rem;">Limit: Max 5 items</span>
+                            <span style="color:#666; font-size:0.75rem;">Select categories</span>
                             <span onclick="clearAllOptions('categoryMultiselect')" style="cursor:pointer; color:#d9534f; font-size:0.75rem;">Clear All</span>
                         </div>
                         <div class="dropdown-options-list" id="categoryOptionsList">
                             @forelse($categories as $category)
                                 <label class="dropdown-option-item">
-                                    <input type="checkbox" name="footer_categories[]" value="{{ $category['id'] }}" data-title="{{ $category['title'] ?? $category['name'] ?? '' }}" {{ in_array($category['id'], $selectedCats) ? 'checked' : '' }} onchange="handleLimitCheckbox(this, 'categoryMultiselect', 5)">
+                                    <input type="checkbox" name="footer_categories[]" value="{{ $category['id'] }}" data-title="{{ $category['title'] ?? $category['name'] ?? '' }}" {{ in_array($category['id'], $selectedCats) ? 'checked' : '' }} onchange="updateMultiselectDisplay('categoryMultiselect')">
                                     <span>{{ $category['title'] ?? $category['name'] ?? '' }}</span>
                                 </label>
                             @empty
@@ -278,13 +278,13 @@
                         </div>
                     </div>
                 </div>
-                <small style="margin-top:0.375rem; display:block; color:#777;">Selected categories will appear in the footer Categories column (maximum 5 items).</small>
+                <small style="margin-top:0.375rem; display:block; color:#777;">Selected categories will appear in the footer Categories column.</small>
             </div>
             
             <div class="form-group">
-                <label class="form-label">Footer Quick Links <span style="font-size:0.8rem; color:#d9534f; font-weight:normal;">(Max 5 items)</span></label>
+                <label class="form-label">Footer Quick Links</label>
                 <div id="quick-links-container">
-                    @php $quickLinks = array_slice($settings['footer_quick_links'] ?? [], 0, 5); @endphp
+                    @php $quickLinks = (array) ($settings['footer_quick_links'] ?? []); @endphp
                     
                     @if(empty($quickLinks))
                         <div class="quick-link-row" style="display:flex; gap:0.625rem; margin-bottom:0.625rem;">
@@ -319,30 +319,9 @@
     document.addEventListener('DOMContentLoaded', function() {
         const container = document.getElementById('quick-links-container');
         const addBtn = document.getElementById('add-quick-link-btn');
-        
-        function updateQuickLinkLimit() {
-            if (!container || !addBtn) return;
-            const count = container.querySelectorAll('.quick-link-row').length;
-            if (count >= 5) {
-                addBtn.disabled = true;
-                addBtn.style.opacity = '0.5';
-                addBtn.style.cursor = 'not-allowed';
-                addBtn.innerText = '+ Add Quick Link (Max 5 Reached)';
-            } else {
-                addBtn.disabled = false;
-                addBtn.style.opacity = '1';
-                addBtn.style.cursor = 'pointer';
-                addBtn.innerText = '+ Add Quick Link';
-            }
-        }
 
         if(addBtn) {
             addBtn.addEventListener('click', function() {
-                const currentRows = container.querySelectorAll('.quick-link-row').length;
-                if (currentRows >= 5) {
-                    alert('You can add a maximum of 5 Quick Links.');
-                    return;
-                }
                 const row = document.createElement('div');
                 row.className = 'quick-link-row';
                 row.style = 'display:flex; gap:0.625rem; margin-bottom:0.625rem;';
@@ -352,7 +331,6 @@
                     <button type="button" class="btn btn-danger remove-link-btn" style="padding:0 0.9375rem;">&times;</button>
                 `;
                 container.appendChild(row);
-                updateQuickLinkLimit();
             });
             
             container.addEventListener('click', function(e) {
@@ -364,11 +342,8 @@
                         // Just clear the inputs if it's the last row
                         row.querySelectorAll('input').forEach(input => input.value = '');
                     }
-                    updateQuickLinkLimit();
                 }
             });
-
-            updateQuickLinkLimit();
         }
 
         // Initialize multiselect
@@ -387,30 +362,9 @@
         }
     });
 
-    function handleLimitCheckbox(checkbox, containerId, maxLimit = 5) {
-        const container = document.getElementById(containerId);
-        const checkedBoxes = container.querySelectorAll('.dropdown-options-list input[type="checkbox"]:checked');
-        if (checkedBoxes.length > maxLimit) {
-            checkbox.checked = false;
-            alert('You can select a maximum of ' + maxLimit + ' items only.');
-        }
-        updateMultiselectDisplay(containerId);
-    }
-
     function updateMultiselectDisplay(containerId) {
         const container = document.getElementById(containerId);
         const tagsBox = container.querySelector('.selected-tags');
-        const checkedInputs = container.querySelectorAll('.dropdown-options-list input[type="checkbox"]:checked');
-        
-        // Enforce max 5 limit if existing data had more
-        if (checkedInputs.length > 5) {
-            checkedInputs.forEach((cb, idx) => {
-                if (idx >= 5) {
-                    cb.checked = false;
-                }
-            });
-        }
-
         const activeInputs = container.querySelectorAll('.dropdown-options-list input[type="checkbox"]:checked');
         tagsBox.innerHTML = '';
         if (activeInputs.length === 0) {

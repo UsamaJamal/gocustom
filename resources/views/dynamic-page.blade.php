@@ -47,20 +47,20 @@
         margin: 1.875rem auto 3.75rem auto;
         padding: 0 var(--site-container-gutter, 3.4375rem);
         font-family: 'DM Sans', sans-serif;
-        color: #333;
+        color: #000000;
         line-height: 1.8;
         font-size: 1rem;
     }
-    .dynamic-container h2, .dynamic-container h3, .dynamic-container h4, .dynamic-container h5, .dynamic-container h6 {
+    .dynamic-container h1, .dynamic-container h2, .dynamic-container h3, .dynamic-container h4, .dynamic-container h5, .dynamic-container h6 {
         font-family: 'Open Sans', sans-serif;
-        color: #111;
+        color: #000000;
         margin-top: 1.875rem;
         margin-bottom: 0.9375rem;
         font-weight: 700;
     }
     .dynamic-container p {
         margin-bottom: 1.25rem;
-        color: #444;
+        color: #000000;
     }
     .dynamic-container ul, .dynamic-container ol {
         margin-bottom: 1.25rem;
@@ -68,13 +68,19 @@
     }
     .dynamic-container li {
         margin-bottom: 0.625rem;
+        color: #000000;
     }
-    .dynamic-container a {
+    .dynamic-container li::marker {
+        color: #000000;
+    }
+    .dynamic-container a,
+    .dynamic-container a * {
         color: var(--primary-color, #0B2240);
         text-decoration: underline;
         text-underline-offset: 0.1875rem;
     }
-    .dynamic-container a:hover {
+    .dynamic-container a:hover,
+    .dynamic-container a:hover * {
         color: #1a4f8b;
         text-decoration: underline;
     }

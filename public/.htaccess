@@ -10,7 +10,7 @@
     RewriteCond %{QUERY_STRING} (^|&)prize(/|$) [NC]
     RewriteRule ^ - [G,L]
 
-    RewriteRule ^(?:public/)?delivery-information(?:\.php)?$ - [G,L]
+    RewriteRule ^(?:public/)?delivery-information\.php$ - [G,L]
     RewriteRule ^(?:public/)?prize(?:/.*)?$ - [G,L]
 
     # 1-Hop Canonical Redirect: Force HTTPS and Non-WWW simultaneously

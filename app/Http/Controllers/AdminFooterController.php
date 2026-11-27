@@ -110,8 +110,8 @@ class AdminFooterController extends Controller
         $settings['social_pinterest'] = $request->input('social_pinterest');
         $settings['social_linkedin'] = $request->input('social_linkedin');
         $settings['social_youtube'] = $request->input('social_youtube');
-        $settings['footer_categories'] = array_slice(array_map('intval', (array) $request->input('footer_categories', [])), 0, 5);
-        $settings['footer_products'] = array_slice(array_values(array_map('intval', (array) $request->input('footer_products', []))), 0, 5);
+        $settings['footer_categories'] = array_values(array_map('intval', (array) $request->input('footer_categories', [])));
+        $settings['footer_products'] = array_values(array_map('intval', (array) $request->input('footer_products', [])));
         $settings['footer_policy_pages'] = array_values(array_map('intval', (array) $request->input('footer_policy_pages', [])));
         $settings['footer_description'] = $request->input('footer_description');
 
@@ -127,7 +127,7 @@ class AdminFooterController extends Controller
                 ];
             }
         }
-        $settings['footer_quick_links'] = array_slice($quickLinks, 0, 5);
+        $settings['footer_quick_links'] = $quickLinks;
 
         foreach ($settings as $key => $value) {
             $valueType = 'text';

@@ -20,7 +20,6 @@ class CanonicalTrailingSlash
 
         // Return 410 Gone for permanently removed spam / prize URLs without redirecting
         if ($path === 'delivery-information.php'
-            || $path === 'delivery-information'
             || str_starts_with($path, 'prize/')
             || $path === 'prize'
             || ($request->getQueryString() && (str_starts_with($request->getQueryString(), 'prize') || str_contains($request->getQueryString(), 'prize/')))) {

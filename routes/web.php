@@ -94,10 +94,6 @@ Route::any('/delivery-information.php', function () {
     abort(410, 'Gone');
 });
 
-Route::any('/delivery-information', function () {
-    abort(410, 'Gone');
-});
-
 Route::get('/product', function () {
     return redirect('/', 301);
 });

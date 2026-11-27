@@ -108,6 +108,11 @@
             document_base_url: '{{ url('/') }}/',
             automatic_uploads: true,
             paste_data_images: true,
+            setup: function (editor) {
+                editor.on('change keyup blur SetContent', function () {
+                    editor.save();
+                });
+            },
             file_picker_types: 'image media',
             images_upload_handler: function (blobInfo) {
                 const data = new FormData();
@@ -161,6 +166,13 @@
 
             return result.location;
         };
+
+        // Ensure all TinyMCE instances (including Source Code <> edits) sync to their textareas before submit
+        document.addEventListener('submit', function () {
+            if (typeof tinymce !== 'undefined') {
+                tinymce.triggerSave();
+            }
+        }, true);
     </script>
 </head>
 <body>
